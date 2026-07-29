@@ -1,53 +1,16 @@
 {
   "name": "claude-code-cursor-notification",
-  "displayName": "Claude Code Cursor Notification",
-  "description": "Contextual Claude Code notifications that return to the originating Cursor terminal.",
+  "description": "Standalone macOS notifications for Claude Code in Cursor.",
   "version": "0.2.0",
-  "publisher": "le0u0",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/le0u0/claude-code-cursor-notification.git"
   },
   "engines": {
-    "vscode": "^1.96.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [
-    "onStartupFinished",
-    "onCommand:claudeCursorNotification.setup",
-    "onCommand:claudeCursorNotification.test"
-  ],
-  "main": "./src/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "claudeCursorNotification.setup",
-        "title": "Claude Notification: Install Hooks"
-      },
-      {
-        "command": "claudeCursorNotification.test",
-        "title": "Claude Notification: Test Notification"
-      }
-    ],
-    "configuration": {
-      "title": "Claude Cursor Notification",
-      "properties": {
-        "claudeCursorNotification.sound": {
-          "type": "string",
-          "default": "Blow",
-          "description": "macOS notification sound name. Use an empty value for no sound."
-        }
-      }
-    }
+    "node": ">=18"
   },
   "scripts": {
-    "test": "node --test",
-    "package": "vsce package --no-dependencies"
-  },
-  "devDependencies": {
-    "@vscode/vsce": "^3.6.0"
+    "test": "node --test"
   }
 }

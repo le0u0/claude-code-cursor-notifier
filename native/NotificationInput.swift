@@ -5,7 +5,7 @@ struct NotificationInput {
     let subtitle: String
     let body: String
     let identifier: String
-    let clickFile: String
+    let projectPath: String
     let sound: String?
 }
 
@@ -27,7 +27,7 @@ func parseArguments(_ arguments: [String]) -> NotificationInput? {
         let title = values["title"],
         let body = values["body"],
         let identifier = values["identifier"],
-        let clickFile = values["click-file"]
+        let projectPath = values["project-path"]
     else {
         return nil
     }
@@ -37,7 +37,7 @@ func parseArguments(_ arguments: [String]) -> NotificationInput? {
         subtitle: values["subtitle"] ?? "",
         body: body,
         identifier: identifier,
-        clickFile: clickFile,
+        projectPath: projectPath,
         sound: values["sound"]
     )
 }

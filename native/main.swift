@@ -31,7 +31,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             content.title = input.title
             content.subtitle = input.subtitle
             content.body = input.body
-            content.userInfo = ["clickFile": input.clickFile]
+            content.userInfo = ["projectPath": input.projectPath]
             if let sound = input.sound, !sound.isEmpty {
                 content.sound = UNNotificationSound(
                     named: UNNotificationSoundName(rawValue: sound)
@@ -57,8 +57,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        if let clickFile = response.notification.request.content.userInfo["clickFile"] as? String {
-            FileManager.default.createFile(atPath: clickFile, contents: Data())
+        if let projectPath =
+            response.notification.request.content.userInfo["projectPath"] as? String
+        {
+            try? openProject(projectPath)
         }
         completionHandler()
         NSApplication.shared.terminate(nil)

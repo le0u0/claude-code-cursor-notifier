@@ -1,10 +1,10 @@
 # Claude Code Cursor Notification
 
-macOS notifications for Claude Code running in Cursor terminals.
+Standalone macOS notifications for Claude Code running in Cursor.
 
 - See when Claude needs approval or finishes a task.
 - See the project, original task, and relevant command or response.
-- Click a notification to return to the correct Cursor terminal.
+- Click a notification to open its project in Cursor.
 - Keep existing Claude hooks.
 
 ## Requirements
@@ -21,22 +21,12 @@ xcode-select --install
 curl -fsSL https://raw.githubusercontent.com/le0u0/claude-code-cursor-notification/main/install.sh | sh
 ```
 
-Then:
-
-1. Reload Cursor.
-2. Run `Claude Notification: Install Hooks` from the Command Palette.
-3. Open a new integrated terminal and run `claude`.
-
-Optional: run `Claude Notification: Test Notification` from the Command Palette.
-
-Allow macOS notification and Cursor Accessibility permissions when prompted.
+Done. Run `claude` normally. Allow macOS notification permission when prompted.
 
 ## Development
 
 ```bash
-npm install
 npm test
-npm run package
 ```
 
 ## License

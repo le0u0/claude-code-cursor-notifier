@@ -3,10 +3,8 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const { spawn } = require("node:child_process");
 const { signalFromHook } = require("./hook-lib");
-
-const channel = process.env.CLAUDE_CURSOR_NOTIFICATION_CHANNEL;
-if (!channel) process.exit(0);
 
 let input = "";
 process.stdin.setEncoding("utf8");
@@ -25,9 +23,31 @@ process.stdin.on("end", () => {
   const signal = signalFromHook(payload);
   if (!signal) return;
 
-  fs.mkdirSync(channel, { recursive: true });
-  const temporary = path.join(channel, `.signal-${signal.id}.tmp`);
-  const destination = path.join(channel, `signal-${signal.id}.json`);
-  fs.writeFileSync(temporary, JSON.stringify(signal), { mode: 0o600 });
-  fs.renameSync(temporary, destination);
+  const notifier =
+    process.env.CLAUDE_CURSOR_NOTIFIER_PATH ||
+    path.join(
+      __dirname,
+      "ClaudeCursorNotifier.app",
+      "Contents",
+      "MacOS",
+      "ClaudeCursorNotifier"
+    );
+  if (!fs.existsSync(notifier)) return;
+
+  const args = [
+    "--title",
+    signal.title,
+    "--subtitle",
+    signal.subtitle,
+    "--body",
+    signal.body,
+    "--identifier",
+    `claude-${signal.sessionId || signal.id}`,
+    "--project-path",
+    signal.cwd
+  ];
+  const sound = process.env.CLAUDE_CURSOR_NOTIFICATION_SOUND ?? "Blow";
+  if (sound) args.push("--sound", sound);
+
+  spawn(notifier, args, { detached: true, stdio: "ignore" }).unref();
 });

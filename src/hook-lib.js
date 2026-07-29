@@ -2,7 +2,6 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
-const { spawnSync } = require("node:child_process");
 
 function firstLine(value, limit = 180) {
   const line = String(value || "")
@@ -102,24 +101,6 @@ function notificationFromHook(payload) {
   return null;
 }
 
-function processChain(startPid = process.ppid) {
-  const chain = [];
-  const seen = new Set();
-  let pid = Number(startPid);
-
-  while (Number.isInteger(pid) && pid > 1 && !seen.has(pid)) {
-    chain.push(pid);
-    seen.add(pid);
-    const result = spawnSync("/bin/ps", ["-p", String(pid), "-o", "ppid="], {
-      encoding: "utf8"
-    });
-    if (result.status !== 0) break;
-    pid = Number(result.stdout.trim());
-  }
-
-  return chain;
-}
-
 function signalFromHook(payload, options = {}) {
   const notification = notificationFromHook(payload);
   if (!notification) return null;
@@ -128,8 +109,6 @@ function signalFromHook(payload, options = {}) {
     id: options.id || `${Date.now()}-${process.pid}`,
     sessionId: payload.session_id || "",
     cwd: payload.cwd || process.cwd(),
-    pids: options.pids || processChain(),
-    createdAt: new Date().toISOString(),
     ...notification
   };
 }
@@ -138,7 +117,6 @@ module.exports = {
   describeTool,
   firstLine,
   notificationFromHook,
-  processChain,
   signalFromHook,
   taskFromTranscript,
   textFromContent

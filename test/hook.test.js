@@ -9,8 +9,23 @@ const test = require("node:test");
 
 const hookPath = path.join(__dirname, "..", "src", "hook.js");
 
-test("writes a signal file for a supported hook event", () => {
-  const channel = fs.mkdtempSync(path.join(os.tmpdir(), "claude-hook-channel-"));
+async function waitForFile(filePath) {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    if (fs.existsSync(filePath)) return;
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+  assert.fail("Timed out waiting for notifier");
+}
+
+test("launches the native notifier for a supported hook event", async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "claude-hook-test-"));
+  const notifier = path.join(directory, "notifier");
+  const log = path.join(directory, "notifier.log");
+  fs.writeFileSync(
+    notifier,
+    '#!/bin/sh\nprintf "%s\\n" "$@" > "$NOTIFIER_LOG"\n',
+    { mode: 0o755 }
+  );
   const payload = {
     hook_event_name: "Stop",
     session_id: "session-123",
@@ -23,51 +38,61 @@ test("writes a signal file for a supported hook event", () => {
     encoding: "utf8",
     env: {
       ...process.env,
-      CLAUDE_CURSOR_NOTIFICATION_CHANNEL: channel
+      CLAUDE_CURSOR_NOTIFIER_PATH: notifier,
+      NOTIFIER_LOG: log
     }
   });
 
   assert.equal(result.status, 0);
-  const files = fs.readdirSync(channel);
-  assert.equal(files.length, 1);
-  assert.match(files[0], /^signal-.+\.json$/);
+  await waitForFile(log);
+  assert.deepEqual(fs.readFileSync(log, "utf8").trim().split("\n"), [
+    "--title",
+    "Claude Code: task complete",
+    "--subtitle",
+    "payments",
+    "--body",
+    "Finished the task.",
+    "--identifier",
+    "claude-session-123",
+    "--project-path",
+    "/tmp/payments",
+    "--sound",
+    "Blow"
+  ]);
 
-  const signal = JSON.parse(fs.readFileSync(path.join(channel, files[0]), "utf8"));
-  assert.equal(signal.sessionId, "session-123");
-  assert.equal(signal.title, "Claude Code: task complete");
-  assert.equal(signal.body, "Finished the task.");
-
-  fs.rmSync(channel, { recursive: true });
+  fs.rmSync(directory, { recursive: true });
 });
 
-test("does nothing without a notification channel", () => {
-  const env = { ...process.env };
-  delete env.CLAUDE_CURSOR_NOTIFICATION_CHANNEL;
+test("does nothing for an unsupported hook event", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "claude-hook-test-"));
+  const log = path.join(directory, "notifier.log");
 
   const result = spawnSync(process.execPath, [hookPath], {
-    input: JSON.stringify({ hook_event_name: "Stop" }),
+    input: JSON.stringify({ hook_event_name: "SessionStart" }),
     encoding: "utf8",
-    env
+    env: {
+      ...process.env,
+      CLAUDE_CURSOR_NOTIFIER_PATH: path.join(directory, "notifier"),
+      NOTIFIER_LOG: log
+    }
   });
 
   assert.equal(result.status, 0);
-  assert.equal(result.stdout, "");
-  assert.equal(result.stderr, "");
+  assert.equal(fs.existsSync(log), false);
+  fs.rmSync(directory, { recursive: true });
 });
 
 test("fails for invalid JSON input", () => {
-  const channel = fs.mkdtempSync(path.join(os.tmpdir(), "claude-hook-channel-"));
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "claude-hook-test-"));
   const result = spawnSync(process.execPath, [hookPath], {
     input: "not json",
     encoding: "utf8",
     env: {
       ...process.env,
-      CLAUDE_CURSOR_NOTIFICATION_CHANNEL: channel
+      CLAUDE_CURSOR_NOTIFIER_PATH: path.join(directory, "notifier")
     }
   });
 
   assert.equal(result.status, 1);
-  assert.deepEqual(fs.readdirSync(channel), []);
-
-  fs.rmSync(channel, { recursive: true });
+  fs.rmSync(directory, { recursive: true });
 });
