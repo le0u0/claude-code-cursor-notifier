@@ -4,7 +4,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 
-const MARKER = "claude-code-cursor-notification";
+const MARKER = "claude-code-cursor-notifier";
 
 function shellQuote(value) {
   return `'${String(value).replace(/'/g, `'\\''`)}'`;

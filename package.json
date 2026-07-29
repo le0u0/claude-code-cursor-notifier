@@ -1,11 +1,11 @@
 {
-  "name": "claude-code-cursor-notification",
+  "name": "claude-code-cursor-notifier",
   "description": "Standalone macOS notifications for Claude Code in Cursor.",
   "version": "0.2.0",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/le0u0/claude-code-cursor-notification.git"
+    "url": "https://github.com/le0u0/claude-code-cursor-notifier.git"
   },
   "engines": {
     "node": ">=18"

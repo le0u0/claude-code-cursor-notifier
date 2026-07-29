@@ -2,7 +2,7 @@
 
 set -eu
 
-repository="le0u0/claude-code-cursor-notification"
+repository="le0u0/claude-code-cursor-notifier"
 archive_url="https://github.com/${repository}/archive/refs/heads/main.tar.gz"
 
 for command in curl tar node swiftc codesign; do
@@ -15,7 +15,8 @@ done
 temporary_directory="$(mktemp -d)"
 trap 'rm -rf "$temporary_directory"' EXIT HUP INT TERM
 
-installation_directory="${CLAUDE_CURSOR_NOTIFICATION_INSTALL_DIR:-$HOME/Library/Application Support/ClaudeCursorNotification}"
+default_installation_directory="$HOME/Library/Application Support/ClaudeCursorNotifier"
+installation_directory="${CLAUDE_CURSOR_NOTIFIER_INSTALL_DIR:-$default_installation_directory}"
 case "$installation_directory" in
   ""|"/"|"$HOME")
     echo "Unsafe installation directory: $installation_directory" >&2
@@ -23,10 +24,10 @@ case "$installation_directory" in
     ;;
 esac
 
-echo "Downloading Claude Code Cursor Notification..."
+echo "Downloading Claude Cursor Notifier..."
 curl -fsSL "$archive_url" | tar -xz -C "$temporary_directory"
 
-project_directory="$temporary_directory/claude-code-cursor-notification-main"
+project_directory="$temporary_directory/claude-code-cursor-notifier-main"
 app_path="$temporary_directory/ClaudeCursorNotifier.app"
 contents_path="$app_path/Contents"
 executable_path="$contents_path/MacOS/ClaudeCursorNotifier"

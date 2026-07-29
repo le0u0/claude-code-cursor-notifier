@@ -25,7 +25,7 @@ test("downloads and installs the standalone notifier", () => {
     path.join(bin, "tar"),
     [
       "#!/bin/sh",
-      'project="$3/claude-code-cursor-notification-main"',
+      'project="$3/claude-code-cursor-notifier-main"',
       'mkdir -p "$project/native" "$project/src"',
       'touch "$project/native/NotificationInput.swift"',
       'touch "$project/native/ProjectOpener.swift"',
@@ -66,7 +66,7 @@ test("downloads and installs the standalone notifier", () => {
     env: {
       ...process.env,
       PATH: `${bin}:/usr/bin:/bin`,
-      CLAUDE_CURSOR_NOTIFICATION_INSTALL_DIR: installationDirectory,
+      CLAUDE_CURSOR_NOTIFIER_INSTALL_DIR: installationDirectory,
       TEST_COMMAND_LOG: log
     }
   });

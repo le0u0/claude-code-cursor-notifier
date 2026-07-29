@@ -1,4 +1,4 @@
-# Claude Code Cursor Notification
+# Claude Cursor Notifier
 
 Standalone macOS notifications for Claude Code running in Cursor.
 
@@ -18,7 +18,7 @@ xcode-select --install
 ## Install
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/le0u0/claude-code-cursor-notification/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/le0u0/claude-code-cursor-notifier/main/install.sh | sh
 ```
 
 Done. Run `claude` normally. Allow macOS notification permission when prompted.

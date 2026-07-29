@@ -46,7 +46,7 @@ process.stdin.on("end", () => {
     "--project-path",
     signal.cwd
   ];
-  const sound = process.env.CLAUDE_CURSOR_NOTIFICATION_SOUND ?? "Blow";
+  const sound = process.env.CLAUDE_CURSOR_NOTIFIER_SOUND ?? "Blow";
   if (sound) args.push("--sound", sound);
 
   spawn(notifier, args, { detached: true, stdio: "ignore" }).unref();

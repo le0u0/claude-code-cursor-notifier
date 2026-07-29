@@ -7,11 +7,11 @@
   <key>CFBundleExecutable</key>
   <string>ClaudeCursorNotifier</string>
   <key>CFBundleIdentifier</key>
-  <string>com.le0u0.claude-code-cursor-notification.helper</string>
+  <string>com.le0u0.claude-code-cursor-notifier.helper</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
-  <string>Claude Cursor Notification</string>
+  <string>Claude Cursor Notifier</string>
   <key>CFBundlePackageType</key>
   <string>APPL</string>
   <key>CFBundleShortVersionString</key>
