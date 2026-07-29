@@ -41,6 +41,7 @@ async function buildNativeHelper(context) {
     "swift-module-cache"
   );
   const sourcePath = context.asAbsolutePath("native/main.swift");
+  const inputSourcePath = context.asAbsolutePath("native/NotificationInput.swift");
   const plistPath = context.asAbsolutePath("native/Info.plist");
 
   await fs.promises.rm(appPath, { recursive: true, force: true });
@@ -50,6 +51,7 @@ async function buildNativeHelper(context) {
   await execFileAsync(
     "/usr/bin/swiftc",
     [
+      inputSourcePath,
       sourcePath,
       "-o",
       executablePath,
