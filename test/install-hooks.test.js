@@ -8,6 +8,7 @@ const { spawnSync } = require("node:child_process");
 const test = require("node:test");
 
 const installer = path.join(__dirname, "..", "src", "install-hooks.js");
+const uninstaller = path.join(__dirname, "..", "src", "uninstall-hooks.js");
 
 test("installs Claude hooks through the CLI", () => {
   const home = fs.mkdtempSync(path.join(os.tmpdir(), "install-hooks-test-"));
@@ -36,4 +37,33 @@ test("requires an installed hook path", () => {
 
   assert.equal(result.status, 1);
   assert.equal(result.stderr, "Usage: install-hooks.js <hook-path>\n");
+});
+
+test("uninstalls Claude hooks through the CLI", () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "uninstall-hooks-test-"));
+  const hookPath = path.join(home, "installed", "hook.js");
+  const install = spawnSync(process.execPath, [installer, hookPath], {
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      HOME: home
+    }
+  });
+  assert.equal(install.status, 0, install.stderr);
+
+  const uninstall = spawnSync(process.execPath, [uninstaller], {
+    encoding: "utf8",
+    env: {
+      ...process.env,
+      HOME: home
+    }
+  });
+
+  assert.equal(uninstall.status, 0, uninstall.stderr);
+  const settings = JSON.parse(
+    fs.readFileSync(path.join(home, ".claude", "settings.json"), "utf8")
+  );
+  assert.equal(settings.hooks, undefined);
+
+  fs.rmSync(home, { recursive: true });
 });

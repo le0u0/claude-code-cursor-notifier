@@ -5,7 +5,13 @@ set -eu
 repository="le0u0/claude-code-cursor-notifier"
 archive_url="https://github.com/${repository}/archive/refs/heads/main.tar.gz"
 
-for command in curl tar node swiftc codesign; do
+if ! command -v swiftc >/dev/null 2>&1; then
+  echo "Apple Swift toolchain is required." >&2
+  echo "Install it with: xcode-select --install" >&2
+  exit 1
+fi
+
+for command in curl tar node codesign; do
   if ! command -v "$command" >/dev/null 2>&1; then
     echo "Required command not found: $command" >&2
     exit 1
@@ -53,7 +59,11 @@ cp "$project_directory/src/hook.js" "$installation_directory/hook.js"
 cp "$project_directory/src/hook-lib.js" "$installation_directory/hook-lib.js"
 cp "$project_directory/src/settings.js" "$installation_directory/settings.js"
 cp "$project_directory/src/install-hooks.js" "$installation_directory/install-hooks.js"
-chmod 755 "$installation_directory/hook.js" "$installation_directory/install-hooks.js"
+cp "$project_directory/src/uninstall-hooks.js" "$installation_directory/uninstall-hooks.js"
+chmod 755 \
+  "$installation_directory/hook.js" \
+  "$installation_directory/install-hooks.js" \
+  "$installation_directory/uninstall-hooks.js"
 rm -rf "$installation_directory/ClaudeCursorNotifier.app"
 mv "$app_path" "$installation_directory/ClaudeCursorNotifier.app"
 node \

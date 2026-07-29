@@ -34,7 +34,8 @@ test("downloads and installs the standalone notifier", () => {
       'touch "$project/src/hook.js"',
       'touch "$project/src/hook-lib.js"',
       'touch "$project/src/settings.js"',
-      'touch "$project/src/install-hooks.js"'
+      'touch "$project/src/install-hooks.js"',
+      'touch "$project/src/uninstall-hooks.js"'
     ].join("\n")
   );
   writeExecutable(
@@ -79,6 +80,10 @@ test("downloads and installs the standalone notifier", () => {
   assert.match(commands, /^node .+install-hooks\.js .+hook\.js$/m);
   assert.equal(fs.existsSync(path.join(installationDirectory, "hook.js")), true);
   assert.equal(
+    fs.existsSync(path.join(installationDirectory, "uninstall-hooks.js")),
+    true
+  );
+  assert.equal(
     fs.existsSync(
       path.join(
         installationDirectory,
@@ -113,7 +118,10 @@ test("explains when the Swift compiler is unavailable", () => {
   });
 
   assert.equal(result.status, 1);
-  assert.match(result.stderr, /Required command not found: swiftc/);
+  assert.equal(
+    result.stderr,
+    "Apple Swift toolchain is required.\nInstall it with: xcode-select --install\n"
+  );
 
   fs.rmSync(directory, { recursive: true });
 });

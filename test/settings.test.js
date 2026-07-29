@@ -1,8 +1,11 @@
 "use strict";
 
 const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 const test = require("node:test");
-const { MARKER, mergeHooks } = require("../src/settings");
+const { MARKER, mergeHooks, uninstallHooks } = require("../src/settings");
 
 test("merges managed hooks without removing existing hooks", () => {
   const current = {
@@ -26,38 +29,25 @@ test("reinstall replaces only the managed hook", () => {
   assert.match(second.hooks.Stop[0].hooks[0].command, /new-hook/);
 });
 
-test("migrates the legacy osascript hooks without touching unrelated hooks", () => {
-  const legacy = {
-    hooks: {
-      Notification: [
-        {
-          matcher: "permission_prompt",
-          hooks: [
-            {
-              type: "command",
-              command:
-                "osascript -e 'display notification \"Claude Code: approval required\" with title \"Claude Code\"'"
-            }
-          ]
-        }
-      ],
-      Stop: [
-        {
-          hooks: [
-            {
-              type: "command",
-              command:
-                "osascript -e 'display notification \"Claude Code: task complete\" with title \"Claude Code\"'"
-            }
-          ]
-        },
-        { hooks: [{ type: "command", command: "keep-me" }] }
-      ]
-    }
-  };
+test("uninstall removes managed hooks without removing existing hooks", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "settings-test-"));
+  const settingsPath = path.join(directory, "settings.json");
+  const current = mergeHooks(
+    {
+      hooks: {
+        Stop: [{ hooks: [{ type: "command", command: "keep-me" }] }]
+      }
+    },
+    "/tmp/hook.js"
+  );
+  fs.writeFileSync(settingsPath, JSON.stringify(current));
 
-  const next = mergeHooks(legacy, "/tmp/hook.js");
-  assert.equal(next.hooks.Notification, undefined);
-  assert.equal(next.hooks.Stop.length, 2);
+  uninstallHooks(settingsPath);
+
+  const next = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
+  assert.equal(next.hooks.Stop.length, 1);
   assert.equal(next.hooks.Stop[0].hooks[0].command, "keep-me");
+  assert.equal(next.hooks.PermissionRequest, undefined);
+
+  fs.rmSync(directory, { recursive: true });
 });

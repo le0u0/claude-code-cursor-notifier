@@ -7,26 +7,30 @@ Standalone macOS notifications for Claude Code running in Cursor.
 - Click a notification to open its project in Cursor.
 - Keep existing Claude hooks.
 
-## Requirements
-
-macOS, Cursor, Node.js, and Apple Swift toolchain:
-
-```bash
-xcode-select --install
-```
-
 ## Install
+
+Requires macOS 13+, Cursor, and Node.js.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/le0u0/claude-code-cursor-notifier/main/install.sh | sh
 ```
 
-Done. Run `claude` normally. Allow macOS notification permission when prompted.
+The installer builds the native notifier and adds `PermissionRequest` and `Stop`
+hooks to `~/.claude/settings.json`. Existing hooks are preserved.
 
-## Development
+If the Apple Swift toolchain is missing, the installer tells you how to install it.
+Then run the command again.
+
+Done. Run `claude` normally and allow notifications when macOS asks.
+
+## Update
+
+Run the install command again.
+
+## Uninstall
 
 ```bash
-npm test
+curl -fsSL https://raw.githubusercontent.com/le0u0/claude-code-cursor-notifier/main/uninstall.sh | sh
 ```
 
 ## License
