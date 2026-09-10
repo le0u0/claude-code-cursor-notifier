@@ -74,9 +74,27 @@ function notificationFromHook(payload) {
   if (event === "Stop") {
     return {
       kind: "complete",
-      title: "Claude Code: task complete",
+      title: "Claude needs your attention",
       subtitle: task ? `${project} — ${task}` : project,
       body: firstLine(payload.last_assistant_message, 180) || "Claude finished responding."
+    };
+  }
+
+  if (event === "PreToolUse" && payload.tool_name === "AskUserQuestion") {
+    return {
+      kind: "input",
+      title: "Claude needs your attention",
+      subtitle: task ? `${project} — ${task}` : project,
+      body: firstLine(payload.tool_input?.questions?.map((item) => item.question).join(" "), 180) || "Claude has a question for you."
+    };
+  }
+
+  if (event === "Notification" && ["elicitation_dialog", "elicitation_url_dialog"].includes(payload.notification_type)) {
+    return {
+      kind: "input",
+      title: "Claude needs your attention",
+      subtitle: task ? `${project} — ${task}` : project,
+      body: firstLine(payload.message, 180) || "Claude needs your input."
     };
   }
 

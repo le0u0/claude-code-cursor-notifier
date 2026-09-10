@@ -24,7 +24,10 @@ test("installs Claude hooks through the CLI", () => {
   assert.equal(result.status, 0, result.stderr);
   const settingsPath = path.join(home, ".claude", "settings.json");
   const settings = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
-  assert.match(settings.hooks.PermissionRequest[0].hooks[0].command, /installed\/hook\.js/);
+  assert.equal(settings.hooks.PermissionRequest.length, 1);
+  assert.equal(settings.hooks.PreToolUse[0].matcher, "AskUserQuestion");
+  assert.equal(settings.hooks.Notification[0].matcher, "elicitation_dialog|elicitation_url_dialog");
+  assert.match(settings.hooks.Notification[0].hooks[0].command, /installed\/hook\.js/);
   assert.match(settings.hooks.Stop[0].hooks[0].command, /installed\/hook\.js/);
 
   fs.rmSync(home, { recursive: true });

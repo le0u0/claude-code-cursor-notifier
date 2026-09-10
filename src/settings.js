@@ -14,8 +14,8 @@ function hookCommand(hookPath) {
   return `/usr/bin/env node ${shellQuote(hookPath)} # ${MARKER}`;
 }
 
-function managedHook(command) {
-  return {
+function managedHook(command, matcher) {
+  const hook = {
     hooks: [
       {
         type: "command",
@@ -23,16 +23,19 @@ function managedHook(command) {
       }
     ]
   };
+  if (matcher) hook.matcher = matcher;
+  return hook;
 }
 
 function removeManaged(entries) {
   if (!Array.isArray(entries)) return [];
-  return entries.filter(
-    (entry) =>
-      !entry ||
-      !Array.isArray(entry.hooks) ||
-      !entry.hooks.some((hook) => String(hook.command || "").includes(MARKER))
-  );
+  return entries.flatMap((entry) => {
+    if (!entry || !Array.isArray(entry.hooks)) return [entry];
+    const hooks = entry.hooks.filter(
+      (hook) => !String(hook.command || "").includes(MARKER)
+    );
+    return hooks.length ? [{ ...entry, hooks }] : [];
+  });
 }
 
 function mergeHooks(settings, hookPath) {
@@ -43,6 +46,14 @@ function mergeHooks(settings, hookPath) {
   next.hooks.PermissionRequest = [
     ...removeManaged(next.hooks.PermissionRequest),
     managedHook(command)
+  ];
+  next.hooks.PreToolUse = [
+    ...removeManaged(next.hooks.PreToolUse),
+    managedHook(command, "AskUserQuestion")
+  ];
+  next.hooks.Notification = [
+    ...removeManaged(next.hooks.Notification),
+    managedHook(command, "elicitation_dialog|elicitation_url_dialog")
   ];
   next.hooks.Stop = [
     ...removeManaged(next.hooks.Stop),
@@ -75,7 +86,7 @@ function uninstallHooks(settingsPath = path.join(os.homedir(), ".claude", "setti
   const next = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
   if (!next.hooks) return;
 
-  for (const event of ["PermissionRequest", "Stop"]) {
+  for (const event of ["PermissionRequest", "PreToolUse", "Notification", "Stop"]) {
     const entries = removeManaged(next.hooks[event]);
     if (entries.length) {
       next.hooks[event] = entries;

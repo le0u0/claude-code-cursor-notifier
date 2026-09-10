@@ -22,7 +22,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
 
         center.requestAuthorization(options: [.alert, .sound]) { granted, error in
             guard granted, error == nil else {
-                fputs("Notification permission denied\n", stderr)
+                if let error {
+                    fputs("Notification authorization failed: \(error as NSError)\n", stderr)
+                } else {
+                    fputs("Notification permission denied. Enable notifications for Claude Cursor Notifier in System Settings.\n", stderr)
+                }
                 NSApplication.shared.terminate(nil)
                 return
             }

@@ -27,7 +27,7 @@ test("builds contextual completion notification", () => {
 
   assert.deepEqual(notification, {
     kind: "complete",
-    title: "Claude Code: task complete",
+    title: "Claude needs your attention",
     subtitle: "payments",
     body: "Implemented retry handling. All tests pass."
   });
@@ -65,4 +65,26 @@ test("reads first user task from transcript", () => {
 
   assert.equal(taskFromTranscript(transcript), "Fix payment retries");
   fs.rmSync(directory, { recursive: true });
+});
+
+for (const notification_type of ["elicitation_dialog", "elicitation_url_dialog"]) {
+  test(`alerts for ${notification_type}`, () => {
+    const notification = notificationFromHook({
+      hook_event_name: "Notification", notification_type, cwd: "/tmp/payments",
+      message: "Which account should I use?"
+    });
+    assert.equal(notification.title, "Claude needs your attention");
+    assert.equal(notification.body, "Which account should I use?");
+  });
+}
+
+test("alerts before the interactive question picker", () => {
+  const notification = notificationFromHook({
+    hook_event_name: "PreToolUse", tool_name: "AskUserQuestion", cwd: "/tmp/payments",
+    tool_input: { questions: [{ question: "Which database?" }] }
+  });
+  assert.equal(notification.title, "Claude needs your attention");
+  assert.equal(notification.body, "Which database?");
+  assert.equal(notificationFromHook({ hook_event_name: "PreToolUse", tool_name: "Bash" }), null);
+  assert.equal(notificationFromHook({ hook_event_name: "Notification", notification_type: "idle_prompt" }), null);
 });

@@ -1,37 +1,76 @@
 # Claude Cursor Notifier
 
-Standalone macOS notifications for Claude Code running in Cursor.
+A Claude Code plugin for macOS notifications while working in Cursor's terminal.
 
-- See when Claude needs approval or finishes a task.
-- See the project, original task, and relevant command or response.
-- Click a notification to open its project in Cursor.
-- Keep existing Claude hooks.
+- Alerts for approvals, interactive questions, MCP input, and finished responses.
+- Shows the project, original task, and relevant command or response.
+- Plays a sound; clicking opens the originating project in Cursor.
+- Includes `/claude-cursor-notifier:init` for setup and migration.
+
+Requires macOS, Node.js 18+, Cursor, and terminal-notifier 3+.
 
 ## Install
 
-Requires macOS 13+, Cursor, and Node.js.
+After this version is published to GitHub, run inside Claude Code:
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/le0u0/claude-code-cursor-notifier/main/install.sh | sh
+```text
+/plugin marketplace add le0u0/claude-code-cursor-notifier
+/plugin install claude-cursor-notifier@claude-cursor-notifier-marketplace
 ```
 
-The installer builds the native notifier and adds `PermissionRequest` and `Stop`
-hooks to `~/.claude/settings.json`. Existing hooks are preserved.
+Restart Claude Code, then run:
 
-If the Apple Swift toolchain is missing, the installer tells you how to install it.
-Then run the command again.
+```text
+/claude-cursor-notifier:init
+```
 
-Done. Run `claude` normally and allow notifications when macOS asks.
+The init skill checks dependencies and notification permission, sends a banner,
+sound, and click test, then backs up settings and removes this notifier's old
+standalone hooks. macOS permission must be granted by you. It preserves unrelated hooks.
+Do not use the legacy `install.sh` for plugin installation.
+
+## Test this checkout before publishing
+
+From this repository in Cursor's terminal:
+
+```bash
+claude --plugin-dir "$PWD"
+```
+
+Run `/claude-cursor-notifier:init`. This loads the local checkout without publishing.
+Restart with the same flag for local development; a marketplace installation is
+required for normal plugin update management.
 
 ## Update
 
-Run the install command again.
+For a GitHub marketplace installation:
+
+```text
+/plugin marketplace update claude-cursor-notifier-marketplace
+/plugin update claude-cursor-notifier@claude-cursor-notifier-marketplace
+```
+
+Restart Claude Code. Plugin updates replace the hooks and skill; they do not upgrade
+terminal-notifier or change macOS permissions. Maintainers must publish their changes
+and bump `.claude-plugin/plugin.json` before users can receive a new plugin version.
+
+## Troubleshooting
+
+Run `/claude-cursor-notifier:init` again. Hook delivery errors appear on stderr with
+a setup hint; delivery failure never blocks approval or keeps a Stop hook running.
+The default sound is `Glass`. Set `CLAUDE_CURSOR_NOTIFIER_SOUND` to another system
+sound, or an empty string to mute. `CLAUDE_CURSOR_NOTIFIER_PATH` can point to a custom
+terminal-notifier executable. No runtime files are written inside the plugin cache.
 
 ## Uninstall
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/le0u0/claude-code-cursor-notifier/main/uninstall.sh | sh
+```text
+/plugin uninstall claude-cursor-notifier@claude-cursor-notifier-marketplace
 ```
+
+Restart Claude Code. This leaves terminal-notifier installed for other applications.
+The legacy standalone installer and native sources remain for compatibility; the
+plugin uses terminal-notifier and does not build the native helper.
 
 ## License
 

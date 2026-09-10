@@ -17,9 +17,9 @@ async function waitForFile(filePath) {
   assert.fail("Timed out waiting for notifier");
 }
 
-test("launches the native notifier for a supported hook event", async () => {
+test("launches terminal-notifier for a supported hook event", async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "claude-hook-test-"));
-  const notifier = path.join(directory, "notifier");
+  const notifier = path.join(directory, "terminal-notifier");
   const log = path.join(directory, "notifier.log");
   fs.writeFileSync(
     notifier,
@@ -46,18 +46,18 @@ test("launches the native notifier for a supported hook event", async () => {
   assert.equal(result.status, 0);
   await waitForFile(log);
   assert.deepEqual(fs.readFileSync(log, "utf8").trim().split("\n"), [
-    "--title",
-    "Claude Code: task complete",
-    "--subtitle",
+    "-title",
+    "Claude needs your attention",
+    "-subtitle",
     "payments",
-    "--body",
+    "-message",
     "Finished the task.",
-    "--identifier",
+    "-group",
     "claude-session-123",
-    "--project-path",
-    "/tmp/payments",
-    "--sound",
-    "Blow"
+    "-execute",
+    "/usr/bin/open -a Cursor '/tmp/payments'",
+    "-sound",
+    "Glass"
   ]);
 
   fs.rmSync(directory, { recursive: true });
@@ -95,4 +95,14 @@ test("fails for invalid JSON input", () => {
 
   assert.equal(result.status, 1);
   fs.rmSync(directory, { recursive: true });
+});
+
+test("notification failure reports setup instructions without blocking Claude", () => {
+  const result = spawnSync(process.execPath, [hookPath], {
+    input: JSON.stringify({ hook_event_name: "PermissionRequest", tool_name: "Bash" }),
+    encoding: "utf8",
+    env: { ...process.env, CLAUDE_CURSOR_NOTIFIER_PATH: "/nonexistent/notifier" }
+  });
+  assert.equal(result.status, 0);
+  assert.match(result.stderr, /claude-cursor-notifier:init/);
 });
