@@ -5,11 +5,19 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { spawnSync } = require("node:child_process");
+const { saveEditor } = require("./editor");
 const { notifierPath, notify } = require("./notifier");
 const { removeManaged, uninstallHooks } = require("./settings");
 
 const mode = process.argv[2] || "--check";
-if (mode === "--check") {
+if (mode === "--editor") {
+  try {
+    process.stdout.write(`Notification clicks will open ${saveEditor(process.argv[3])}.\n`);
+  } catch (error) {
+    process.stderr.write(`${error.message}\n`);
+    process.exitCode = 1;
+  }
+} else if (mode === "--check") {
   if (process.platform !== "darwin") {
     process.stderr.write("This plugin requires macOS.\n");
     process.exitCode = 1;
@@ -28,7 +36,7 @@ if (mode === "--check") {
     id: "init-test", cwd,
     title: "Claude Cursor Notifier: setup test",
     subtitle: path.basename(cwd),
-    body: "Click this notification to open this project in Cursor."
+    body: "Click this notification to open this project in your selected editor."
   }) ? 0 : 1;
 } else if (mode === "--migrate") {
   const settingsPath = path.join(process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), ".claude"), "settings.json");
@@ -50,6 +58,6 @@ if (mode === "--check") {
     }
   }
 } else {
-  process.stderr.write("Usage: init.js [--check|--test|--migrate]\n");
+  process.stderr.write("Usage: init.js [--check|--test|--migrate|--editor cursor|vscode]\n");
   process.exitCode = 1;
 }

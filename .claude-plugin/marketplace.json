@@ -7,10 +7,10 @@
     {
       "name": "claude-cursor-notifier",
       "source": "./",
-      "description": "macOS alerts for Claude Code questions, approvals, and responses, with click-to-open Cursor."
+      "description": "macOS alerts for Claude Code questions, approvals, and responses, with click-to-open Cursor or VS Code."
     }
   ],
   "metadata": {
-    "description": "Claude Code notifications with sound and click-to-open Cursor."
+    "description": "Claude Code notifications with sound and click-to-open Cursor or VS Code."
   }
 }

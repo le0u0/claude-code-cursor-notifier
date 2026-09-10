@@ -34,6 +34,7 @@ test("downloads and installs the standalone notifier", () => {
       'touch "$project/src/hook.js"',
       'touch "$project/src/hook-lib.js"',
       'touch "$project/src/notifier.js"',
+      'touch "$project/src/editor.js"',
       'touch "$project/src/settings.js"',
       'touch "$project/src/install-hooks.js"',
       'touch "$project/src/uninstall-hooks.js"'

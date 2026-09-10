@@ -39,6 +39,7 @@ test("launches terminal-notifier for a supported hook event", async () => {
     env: {
       ...process.env,
       CLAUDE_CURSOR_NOTIFIER_PATH: notifier,
+      CLAUDE_CONFIG_DIR: directory,
       NOTIFIER_LOG: log
     }
   });
@@ -55,7 +56,7 @@ test("launches terminal-notifier for a supported hook event", async () => {
     "-group",
     "claude-session-123",
     "-execute",
-    "/usr/bin/open -a Cursor '/tmp/payments'",
+    "/usr/bin/open -a 'Cursor' '/tmp/payments'",
     "-sound",
     "Glass"
   ]);
@@ -73,6 +74,7 @@ test("does nothing for an unsupported hook event", () => {
     env: {
       ...process.env,
       CLAUDE_CURSOR_NOTIFIER_PATH: path.join(directory, "notifier"),
+      CLAUDE_CONFIG_DIR: directory,
       NOTIFIER_LOG: log
     }
   });

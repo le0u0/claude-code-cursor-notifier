@@ -2,6 +2,7 @@
 
 const fs = require("node:fs");
 const { spawnSync } = require("node:child_process");
+const { editorName } = require("./editor");
 const { shellQuote } = require("./settings");
 
 function notifierPath() {
@@ -11,6 +12,13 @@ function notifierPath() {
 }
 
 function notify(signal) {
+  let editor;
+  try {
+    editor = editorName();
+  } catch (error) {
+    process.stderr.write(`Claude Cursor Notifier: ${error.message}\n`);
+    return false;
+  }
   // NSUserDefaults interprets leading punctuation as property-list syntax.
   const escape = (value) => /^[\[({"']/.test(value) ? `\\${value}` : value;
   const args = [
@@ -18,7 +26,7 @@ function notify(signal) {
     "-subtitle", escape(signal.subtitle),
     "-message", escape(signal.body),
     "-group", `claude-${signal.sessionId || signal.id}`,
-    "-execute", `/usr/bin/open -a Cursor ${shellQuote(signal.cwd)}`
+    "-execute", `/usr/bin/open -a ${shellQuote(editor)} ${shellQuote(signal.cwd)}`
   ];
   const sound = process.env.CLAUDE_CURSOR_NOTIFIER_SOUND ?? "Glass";
   if (sound) args.push("-sound", sound);

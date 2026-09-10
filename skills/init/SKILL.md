@@ -1,6 +1,6 @@
 ---
 name: init
-description: Set up or diagnose Claude Cursor Notifier dependencies, macOS notification permission, click-to-open Cursor, and migration from its standalone hooks.
+description: Set up or diagnose Claude Cursor Notifier dependencies, macOS notification permission, click-to-open Cursor or VS Code, and migration from its standalone hooks.
 ---
 
 Initialize this plugin in the user's current project. Use the plugin scripts below;
@@ -17,8 +17,14 @@ keep the working directory at that project so the test opens the correct folder.
    determined, run the test below to request permission. Let the user answer the
    macOS prompt, then rerun the check. Do not reset permissions, change notification
    preferences, or infer that exit code zero proves a visible banner.
-3. Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --test`. Ask the user to confirm
-   the banner, sound, and whether clicking it opened this project in Cursor.
+3. Ask which editor notification clicks should open: Cursor or VS Code. Explain
+   that this is a global preference for this Claude configuration, not automatic
+   detection of the current terminal. Save their choice with
+   `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --editor cursor` or
+   `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --editor vscode`. Confirm the selected
+   application is installed. The preference persists outside the plugin cache.
+   Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --test`. Ask the user to confirm
+   the banner, sound, and whether clicking it opened this project in the selected editor.
    If any part fails, investigate that result before migrating. Respect an
    intentionally muted sound setting; do not call audible delivery verified.
 4. Once the test succeeds and this plugin is enabled, run

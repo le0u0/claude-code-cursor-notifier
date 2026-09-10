@@ -1,6 +1,6 @@
 {
   "name": "claude-code-cursor-notifier",
-  "description": "macOS alerts for Claude Code questions, approvals, and responses, with click-to-open Cursor.",
+  "description": "macOS alerts for Claude Code questions, approvals, and responses, with click-to-open Cursor or VS Code.",
   "version": "0.3.0",
   "license": "MIT",
   "repository": {

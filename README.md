@@ -1,13 +1,13 @@
 # Claude Cursor Notifier
 
-A Claude Code plugin for macOS notifications while working in Cursor's terminal.
+A Claude Code plugin for macOS notifications while working in Cursor or VS Code's terminal.
 
 - Alerts for approvals, interactive questions, MCP input, and finished responses.
 - Shows the project, original task, and relevant command or response.
-- Plays a sound; clicking opens the originating project in Cursor.
+- Plays a sound; clicking opens the originating project in your selected editor.
 - Includes `/claude-cursor-notifier:init` for setup and migration.
 
-Requires macOS, Node.js 18+, Cursor, and terminal-notifier 3+.
+Requires macOS, Node.js 18+, Cursor or VS Code, and terminal-notifier 3+.
 
 ## Install
 
@@ -24,7 +24,7 @@ Restart Claude Code, then run:
 /claude-cursor-notifier:init
 ```
 
-The init skill checks dependencies and notification permission, sends a banner,
+The init skill lets you choose Cursor or VS Code, checks dependencies and notification permission, sends a banner,
 sound, and click test, then backs up settings and removes this notifier's old
 standalone hooks. macOS permission must be granted by you. It preserves unrelated hooks.
 Do not use the legacy `install.sh` for plugin installation.
@@ -75,3 +75,11 @@ plugin uses terminal-notifier and does not build the native helper.
 ## License
 
 MIT
+
+## Editor preference
+
+Run `/claude-cursor-notifier:init` to choose Cursor or VS Code. The choice applies
+to all sessions using the same Claude configuration; it does not automatically
+switch with the terminal host. Cursor is the default until configured. The choice
+is saved in `~/.claude/claude-cursor-notifier.json` (or under `CLAUDE_CONFIG_DIR`)
+and survives plugin updates.
