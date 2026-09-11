@@ -27,9 +27,9 @@ test("builds contextual completion notification", () => {
 
   assert.deepEqual(notification, {
     kind: "complete",
-    title: "Claude needs your attention",
+    title: "Claude Code",
     subtitle: "payments",
-    body: "Implemented retry handling. All tests pass."
+    body: "Response finished"
   });
 });
 
@@ -43,9 +43,9 @@ test("builds exact permission notification", () => {
 
   assert.deepEqual(notification, {
     kind: "approval",
-    title: "Claude Code: approval required",
+    title: "Claude Code",
     subtitle: "payments",
-    body: "Bash: git push origin feature/retries"
+    body: "Approval required"
   });
 });
 
@@ -73,8 +73,8 @@ for (const notification_type of ["elicitation_dialog", "elicitation_url_dialog"]
       hook_event_name: "Notification", notification_type, cwd: "/tmp/payments",
       message: "Which account should I use?"
     });
-    assert.equal(notification.title, "Claude needs your attention");
-    assert.equal(notification.body, "Which account should I use?");
+    assert.equal(notification.title, "Claude Code");
+    assert.equal(notification.body, "Connected tool needs your input");
   });
 }
 
@@ -83,8 +83,8 @@ test("alerts before the interactive question picker", () => {
     hook_event_name: "PreToolUse", tool_name: "AskUserQuestion", cwd: "/tmp/payments",
     tool_input: { questions: [{ question: "Which database?" }] }
   });
-  assert.equal(notification.title, "Claude needs your attention");
-  assert.equal(notification.body, "Which database?");
+  assert.equal(notification.title, "Claude Code");
+  assert.equal(notification.body, "Waiting for your answer");
   assert.equal(notificationFromHook({ hook_event_name: "PreToolUse", tool_name: "Bash" }), null);
   assert.equal(notificationFromHook({ hook_event_name: "Notification", notification_type: "idle_prompt" }), null);
 });

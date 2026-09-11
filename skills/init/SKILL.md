@@ -7,14 +7,16 @@ Initialize this plugin in the user's current project. Use the plugin scripts bel
 keep the working directory at that project so the test opens the correct folder.
 
 1. Check macOS and Node.js 18+. If Node is missing, guide the user through installing
-   Node before running scripts. Check `terminal-notifier` (Homebrew paths include
-   `/opt/homebrew/bin` and `/usr/local/bin`). If missing, offer
-   `brew install terminal-notifier`; install after the user agrees. Version 3+ is
-   required for `-diagnose`; offer `brew upgrade terminal-notifier` for older versions.
+   Node before running scripts. First check for the existing executable at
+   `~/Library/Application Support/ClaudeCursorNotifierIcon/Claude Code Notifier.app/Contents/MacOS/terminal-notifier`.
+   If present, reuse it; do not require Homebrew or reinstall terminal-notifier.
+   Only for first setup or a missing helper, check Homebrew terminal-notifier 3+
+   and offer `brew install terminal-notifier` if missing. Install after agreement.
 2. Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --icon` to install or refresh the
    dedicated helper with the black bell-and-terminal icon. This preserves Homebrew's
    original app. The dedicated app is named **Claude Code Notifier** and requires
-   separate macOS permission. Re-run after icon or terminal-notifier updates.
+   separate macOS permission. Existing helpers are reused for icon updates; unchanged
+   icons skip rebuilding and signing. This does not upgrade the helper engine.
    Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --check`. Read the authorization,
    banner, sound, and notification-centre status. The app to configure is
    **Claude Code Notifier**, not the original **terminal-notifier**. Their permissions
@@ -52,7 +54,12 @@ keep the working directory at that project so the test opens the correct folder.
    commands even inside shared hook entries. It honors `CLAUDE_CONFIG_DIR`.
    Do not delete old application files or run the legacy installer. Inspect any
    project-level hook overrides if duplicates remain; do not remove unmarked hooks.
-5. Tell the user to restart Claude Code. Verify `/hooks` includes this plugin's
+5. After the custom helper passes permission, sound, and project-click tests,
+   explain that Homebrew terminal-notifier can be removed with
+   `brew uninstall terminal-notifier`. Ask before uninstalling: other software may
+   still use it. Keep the custom app. Uninstalling the original does not guarantee
+   its old macOS notification-list entry disappears immediately.
+   Tell the user to restart Claude Code. Verify `/hooks` includes this plugin's
    PermissionRequest, AskUserQuestion PreToolUse, MCP Notification, and Stop hooks.
    Ask them to trigger a real question and a completed response. Distinguish the
    setup notification test from verified live Claude events.

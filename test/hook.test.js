@@ -48,11 +48,11 @@ test("launches terminal-notifier for a supported hook event", async () => {
   await waitForFile(log);
   assert.deepEqual(fs.readFileSync(log, "utf8").trim().split("\n"), [
     "-title",
-    "Claude needs your attention",
+    "Claude Code · Cursor",
     "-subtitle",
     "payments",
     "-message",
-    "Finished the task.",
+    "Response finished",
     "-group",
     "claude-session-123",
     "-execute",
