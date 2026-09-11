@@ -1,6 +1,6 @@
 {
   "name": "claude-cursor-notifier",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "macOS alerts for Claude Code questions, approvals, and responses, with click-to-open Cursor or VS Code.",
   "author": {
     "name": "Leo Ho"
