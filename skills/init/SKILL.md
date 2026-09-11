@@ -16,11 +16,26 @@ keep the working directory at that project so the test opens the correct folder.
    original app. The dedicated app is named **Claude Code Notifier** and requires
    separate macOS permission. Re-run after icon or terminal-notifier updates.
    Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --check`. Read the authorization,
-   banner, sound, and notification-centre status. If permission is denied, ask the
-   user to enable Claude Code Notifier in System Settings > Notifications. If not yet
-   determined, run the test below to request permission. Let the user answer the
-   macOS prompt, then rerun the check. Do not reset permissions, change notification
-   preferences, or infer that exit code zero proves a visible banner.
+   banner, sound, and notification-centre status. The app to configure is
+   **Claude Code Notifier**, not the original **terminal-notifier**. Their permissions
+   are separate; permission for the original helper does not transfer.
+   If authorization is not determined, run `--test` once to request permission and
+   let the user answer the macOS prompt.
+   If authorization is denied, alerts or sounds are disabled, or the alert style is
+   banners, open System Settings with `open -a "System Settings"`. Guide the user
+   to Notifications > Claude Code Notifier and ask them to:
+   - Enable Allow Notifications.
+   - Choose Persistent (or Alerts), so the notification stays until dismissed.
+   - Enable Play sound for notification, unless they intentionally want silence.
+   Wait for their reply, then rerun `--check`. Verify authorization is authorized
+   and the alert style is persistent/alerts before proceeding. If they prefer
+   temporary banners or silence, honor that choice and report it explicitly.
+   If the app is absent from the list, run `--test` once, let them respond to any
+   permission prompt, then reopen settings. Stop and report the actual error if it
+   remains absent; do not keep retrying.
+   Do not reset permissions, edit the macOS notification database, or infer that
+   exit code zero proves a visible banner. Never mark setup complete while these
+   user actions are pending.
 3. Ask which editor notification clicks should open: Cursor or VS Code. Explain
    that this is a global preference for this Claude configuration, not automatic
    detection of the current terminal. Save their choice with
@@ -46,6 +61,3 @@ Initialization is repeatable. Updates do not need reinstalling the external help
 or repeating migration unless checks show a problem. Always finish with the user's
 next action. Do not claim setup is complete while permission or click confirmation
 is pending.
-
-For longer visibility, guide the user to select Persistent (or Alerts) for
-Claude Code Notifier in System Settings > Notifications. Do not change it automatically.

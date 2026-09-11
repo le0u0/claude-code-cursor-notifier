@@ -26,7 +26,9 @@ Restart Claude Code, then run:
 
 The init skill lets you choose Cursor or VS Code, checks dependencies and notification permission, sends a banner,
 sound, and click test, then backs up settings and removes this notifier's old
-standalone hooks. macOS permission must be granted by you. It preserves unrelated hooks.
+standalone hooks. The skill opens System Settings when permission or alert style needs attention,
+guides you to allow notifications and choose Persistent/Alerts, then rechecks.
+macOS permission must be granted by you. It preserves unrelated hooks.
 Do not use the legacy `install.sh` for plugin installation.
 
 ## Test this checkout before publishing
