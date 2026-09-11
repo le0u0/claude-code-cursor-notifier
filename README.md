@@ -83,3 +83,12 @@ to all sessions using the same Claude configuration; it does not automatically
 switch with the terminal host. Cursor is the default until configured. The choice
 is saved in `~/.claude/claude-cursor-notifier.json` (or under `CLAUDE_CONFIG_DIR`)
 and survives plugin updates.
+
+## Notification icon
+
+The init skill installs the original black bell-and-terminal icon in a dedicated
+`Claude Code Notifier.app` under `~/Library/Application Support/ClaudeCursorNotifierIcon`.
+It copies the installed terminal-notifier app, preserves its license, and leaves
+Homebrew's copy unchanged. Enable notifications for **Claude Code Notifier** when
+asked. Select **Persistent** (or **Alerts**) in macOS notification settings to keep
+notifications visible until dismissed. Re-run init after icon or helper updates.

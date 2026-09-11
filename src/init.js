@@ -10,7 +10,10 @@ const { notifierPath, notify } = require("./notifier");
 const { removeManaged, uninstallHooks } = require("./settings");
 
 const mode = process.argv[2] || "--check";
-if (mode === "--editor") {
+if (mode === "--icon") {
+  const result = spawnSync("/bin/sh", [path.join(__dirname, "../scripts/install-icon.sh")], { stdio: "inherit" });
+  process.exitCode = result.error ? 1 : result.status || 0;
+} else if (mode === "--editor") {
   try {
     process.stdout.write(`Notification clicks will open ${saveEditor(process.argv[3])}.\n`);
   } catch (error) {
@@ -58,6 +61,6 @@ if (mode === "--editor") {
     }
   }
 } else {
-  process.stderr.write("Usage: init.js [--check|--test|--migrate|--editor cursor|vscode]\n");
+  process.stderr.write("Usage: init.js [--check|--test|--migrate|--icon|--editor cursor|vscode]\n");
   process.exitCode = 1;
 }

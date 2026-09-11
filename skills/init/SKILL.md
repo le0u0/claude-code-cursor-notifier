@@ -11,9 +11,13 @@ keep the working directory at that project so the test opens the correct folder.
    `/opt/homebrew/bin` and `/usr/local/bin`). If missing, offer
    `brew install terminal-notifier`; install after the user agrees. Version 3+ is
    required for `-diagnose`; offer `brew upgrade terminal-notifier` for older versions.
-2. Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --check`. Read the authorization,
+2. Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --icon` to install or refresh the
+   dedicated helper with the black bell-and-terminal icon. This preserves Homebrew's
+   original app. The dedicated app is named **Claude Code Notifier** and requires
+   separate macOS permission. Re-run after icon or terminal-notifier updates.
+   Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --check`. Read the authorization,
    banner, sound, and notification-centre status. If permission is denied, ask the
-   user to enable terminal-notifier in System Settings > Notifications. If not yet
+   user to enable Claude Code Notifier in System Settings > Notifications. If not yet
    determined, run the test below to request permission. Let the user answer the
    macOS prompt, then rerun the check. Do not reset permissions, change notification
    preferences, or infer that exit code zero proves a visible banner.
@@ -24,7 +28,7 @@ keep the working directory at that project so the test opens the correct folder.
    `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --editor vscode`. Confirm the selected
    application is installed. The preference persists outside the plugin cache.
    Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --test`. Ask the user to confirm
-   the banner, sound, and whether clicking it opened this project in the selected editor.
+   the banner, sound, and whether the black bell-and-terminal icon appears and clicking it opened this project in the selected editor.
    If any part fails, investigate that result before migrating. Respect an
    intentionally muted sound setting; do not call audible delivery verified.
 4. Once the test succeeds and this plugin is enabled, run
@@ -42,3 +46,6 @@ Initialization is repeatable. Updates do not need reinstalling the external help
 or repeating migration unless checks show a problem. Always finish with the user's
 next action. Do not claim setup is complete while permission or click confirmation
 is pending.
+
+For longer visibility, guide the user to select Persistent (or Alerts) for
+Claude Code Notifier in System Settings > Notifications. Do not change it automatically.

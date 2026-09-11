@@ -1,13 +1,16 @@
 "use strict";
 
 const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const { editorName } = require("./editor");
 const { shellQuote } = require("./settings");
 
 function notifierPath() {
   return process.env.CLAUDE_CURSOR_NOTIFIER_PATH ||
-    ["/opt/homebrew/bin/terminal-notifier", "/usr/local/bin/terminal-notifier"]
+    [path.join(os.homedir(), "Library/Application Support/ClaudeCursorNotifierIcon/Claude Code Notifier.app/Contents/MacOS/terminal-notifier"),
+      "/opt/homebrew/bin/terminal-notifier", "/usr/local/bin/terminal-notifier"]
       .find((candidate) => fs.existsSync(candidate)) || "terminal-notifier";
 }
 
