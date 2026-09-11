@@ -3,11 +3,11 @@
 A Claude Code plugin for macOS notifications while working in Cursor or VS Code's terminal.
 
 - Alerts for approvals, interactive questions, MCP input, and finished responses.
-- Shows the project, original task, and relevant command or response.
+- Shows Claude Code and the selected editor, the project name, and the action needed.
 - Plays a sound; clicking opens the originating project in your selected editor.
 - Includes `/claude-cursor-notifier:init` for setup and migration.
 
-Requires macOS, Node.js 18+, Cursor or VS Code, and terminal-notifier 3+.
+Requires macOS, Node.js 18+, Cursor or VS Code, and terminal-notifier 3+ for first setup only.
 
 ## Install
 
@@ -93,4 +93,22 @@ The init skill installs the original black bell-and-terminal icon in a dedicated
 It copies the installed terminal-notifier app, preserves its license, and leaves
 Homebrew's copy unchanged. Enable notifications for **Claude Code Notifier** when
 asked. Select **Persistent** (or **Alerts**) in macOS notification settings to keep
-notifications visible until dismissed. Re-run init after icon or helper updates.
+notifications visible until dismissed. Re-run init after icon updates.
+
+## Remove the temporary Homebrew dependency
+
+After init verifies the custom helper, you may run `brew uninstall terminal-notifier`
+if no other software uses it. Daily alerts, permission checks, and future icon
+updates reuse the standalone custom app. Unchanged icons do not rebuild or re-sign it.
+Keep `~/Library/Application Support/ClaudeCursorNotifierIcon/Claude Code Notifier.app`.
+If that app is deleted, install terminal-notifier again for setup. Plugin updates
+do not upgrade the copied notification engine; upgrading that engine still requires
+a new source helper. macOS may retain the original app's notification-list entry.
+
+## Alert text
+
+Titles use `Claude Code · Cursor` or `Claude Code · VS Code`; subtitles show only
+the project name. Actions are `Response finished`, `Approval required`,
+`Waiting for your answer` (interactive questions), and
+`Connected tool needs your input` (MCP prompts). A plain-text question at the end
+of a response still triggers `Response finished`; Stop does not prove task completion.
