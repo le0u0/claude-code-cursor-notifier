@@ -69,50 +69,49 @@ function describeTool(toolName, input) {
 function notificationFromHook(payload) {
   const event = payload.hook_event_name;
   const project = path.basename(payload.cwd || process.cwd()) || "project";
-  const task = taskFromTranscript(payload.transcript_path);
 
   if (event === "Stop") {
     return {
       kind: "complete",
-      title: "Claude needs your attention",
-      subtitle: task ? `${project} — ${task}` : project,
-      body: firstLine(payload.last_assistant_message, 180) || "Claude finished responding."
+      title: "Claude Code",
+      subtitle: project,
+      body: "Response finished"
     };
   }
 
   if (event === "PreToolUse" && payload.tool_name === "AskUserQuestion") {
     return {
       kind: "input",
-      title: "Claude needs your attention",
-      subtitle: task ? `${project} — ${task}` : project,
-      body: firstLine(payload.tool_input?.questions?.map((item) => item.question).join(" "), 180) || "Claude has a question for you."
+      title: "Claude Code",
+      subtitle: project,
+      body: "Waiting for your answer"
     };
   }
 
   if (event === "Notification" && ["elicitation_dialog", "elicitation_url_dialog"].includes(payload.notification_type)) {
     return {
       kind: "input",
-      title: "Claude needs your attention",
-      subtitle: task ? `${project} — ${task}` : project,
-      body: firstLine(payload.message, 180) || "Claude needs your input."
+      title: "Claude Code",
+      subtitle: project,
+      body: "Connected tool needs your input"
     };
   }
 
   if (event === "PermissionRequest") {
     return {
       kind: "approval",
-      title: "Claude Code: approval required",
-      subtitle: task ? `${project} — ${task}` : project,
-      body: describeTool(payload.tool_name, payload.tool_input)
+      title: "Claude Code",
+      subtitle: project,
+      body: "Approval required"
     };
   }
 
   if (event === "Notification" && payload.notification_type === "permission_prompt") {
     return {
       kind: "approval",
-      title: "Claude Code: approval required",
-      subtitle: task ? `${project} — ${task}` : project,
-      body: firstLine(payload.message, 180) || "Claude needs permission."
+      title: "Claude Code",
+      subtitle: project,
+      body: "Approval required"
     };
   }
 

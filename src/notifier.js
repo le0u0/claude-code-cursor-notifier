@@ -25,7 +25,9 @@ function notify(signal) {
   // NSUserDefaults interprets leading punctuation as property-list syntax.
   const escape = (value) => /^[\[({"']/.test(value) ? `\\${value}` : value;
   const args = [
-    "-title", escape(signal.title),
+    "-title", escape(signal.title === "Claude Code"
+      ? `Claude Code · ${editor === "Visual Studio Code" ? "VS Code" : "Cursor"}`
+      : signal.title),
     "-subtitle", escape(signal.subtitle),
     "-message", escape(signal.body),
     "-group", `claude-${signal.sessionId || signal.id}`,
