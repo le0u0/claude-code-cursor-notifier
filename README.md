@@ -62,21 +62,17 @@ marketplace users can receive a new version.
 ## Duration and sound
 
 - `/claude-cursor-notifier:duration`: choose seconds (positive whole number; default **5**).
-- `/claude-cursor-notifier:sound`: pick a sound with the arrow keys, hear it, then save
-  (default **Glass**; **Silent** mutes). The list covers `~/Library/Sounds`,
+- `/claude-cursor-notifier:sound`: opens a picker in a Terminal window listing every
+  sound (default **Glass**; **Silent** mutes). Up and Down move the highlight and play
+  that sound, Enter saves, Esc cancels. The list covers `~/Library/Sounds`,
   `/Library/Sounds`, and `/System/Library/Sounds`, in the order macOS resolves them,
   so a personal sound of the same name wins.
 
 `/claude-cursor-notifier:init` asks for both instead of assuming a default.
 
-To arrow through every sound on one screen and hear each as you move, run this in a
-real terminal:
-
-```
-node "<plugin>/src/preferences.js" --choose
-```
-
-Up and Down move and play, Enter saves, Esc cancels. It needs a TTY.
+The picker needs a terminal, which the Claude Code prompt does not provide, so it opens
+its own window. Run it directly with `node "<plugin>/src/preferences.js" --choose` if you
+are already at a shell.
 
 These preferences use the same `claude-cursor-notifier.json` as the editor choice,
 respect `CLAUDE_CONFIG_DIR`, and survive plugin updates. The next popup uses the new

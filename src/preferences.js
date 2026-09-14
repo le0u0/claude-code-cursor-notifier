@@ -131,6 +131,30 @@ if (require.main === module) {
         process.stderr.write(`${error.message}\n`);
         process.exitCode = 1;
       });
+    } else if (mode === "--pick") {
+      // Claude Code's prompt has no TTY, so the picker needs a Terminal window of its own.
+      // Terminal runs a handed-over script without the Automation permission Apple events need.
+      const launcher = path.join(os.tmpdir(), "claude-cursor-notifier-sound-picker.command");
+      // Close only the window running this script, matched by tty, so no other window is hit.
+      const script = [
+        "#!/bin/sh",
+        `${JSON.stringify(process.execPath)} ${JSON.stringify(__filename)} --choose`,
+        'own_tty="$(tty)"',
+        "/usr/bin/osascript >/dev/null 2>&1 <<APPLESCRIPT",
+        'tell application "Terminal"',
+        "  repeat with a_window in windows",
+        "    repeat with a_tab in tabs of a_window",
+        '      if tty of a_tab is "$own_tty" then close a_window saving no',
+        "    end repeat",
+        "  end repeat",
+        "end tell",
+        "APPLESCRIPT",
+        ""
+      ].join("\n");
+      fs.writeFileSync(launcher, script, { mode: 0o700 });
+      const result = spawnSync("/usr/bin/open", ["-a", "Terminal", launcher], { encoding: "utf8", timeout: 15000 });
+      if (result.error || result.status !== 0) throw new Error(result.error?.message || result.stderr.trim() || "Could not open Terminal.");
+      process.stdout.write("Opened the sound picker in Terminal. Arrow to a sound, press Enter to save.\n");
     } else if (mode === "--preview") {
       const sound = soundName(value);
       if (sound) {
@@ -138,7 +162,7 @@ if (require.main === module) {
         if (result.error || result.status !== 0) throw new Error(result.error?.message || "Sound preview failed.");
       }
     } else {
-      throw new Error("Usage: preferences.js --show|--saved|--duration SECONDS|--list-sounds|--choose|--sound NAME|--preview NAME");
+      throw new Error("Usage: preferences.js --show|--saved|--duration SECONDS|--list-sounds|--pick|--choose|--sound NAME|--preview NAME");
     }
   } catch (error) {
     process.stderr.write(`${error.message}\n`);
