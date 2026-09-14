@@ -1,70 +1,44 @@
 ---
 name: init
-description: Set up or diagnose Claude Cursor Notifier dependencies, macOS notification permission, click-to-open Cursor or VS Code, and migration from its standalone hooks.
+description: Set up or diagnose Claude Cursor Notifier's custom macOS popup, editor clicks, and migration from standalone hooks.
 ---
 
-Initialize this plugin in the user's current project. Use the plugin scripts below;
-keep the working directory at that project so the test opens the correct folder.
+Keep the working directory at the user's project so the test opens that folder.
 
-1. Check macOS and Node.js 18+. If Node is missing, guide the user through installing
-   Node before running scripts. First check for the existing executable at
-   `~/Library/Application Support/ClaudeCursorNotifierIcon/Claude Code Notifier.app/Contents/MacOS/terminal-notifier`.
-   If present, reuse it; do not require Homebrew or reinstall terminal-notifier.
-   Only for first setup or a missing helper, check Homebrew terminal-notifier 3+
-   and offer `brew install terminal-notifier` if missing. Install after agreement.
-2. Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --icon` to install or refresh the
-   dedicated helper with the black bell-and-terminal icon. This preserves Homebrew's
-   original app. The dedicated app is named **Claude Code Notifier** and requires
-   separate macOS permission. Existing helpers are reused for icon updates; unchanged
-   icons skip rebuilding and signing. This does not upgrade the helper engine.
-   Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --check`. Read the authorization,
-   banner, sound, and notification-centre status. The app to configure is
-   **Claude Code Notifier**, not the original **terminal-notifier**. Their permissions
-   are separate; permission for the original helper does not transfer.
-   If authorization is not determined, run `--test` once to request permission and
-   let the user answer the macOS prompt.
-   If authorization is denied, alerts or sounds are disabled, or the alert style is
-   banners, open System Settings with `open -a "System Settings"`. Guide the user
-   to Notifications > Claude Code Notifier and ask them to:
-   - Enable Allow Notifications.
-   - Choose Persistent (or Alerts), so the notification stays until dismissed.
-   - Enable Play sound for notification, unless they intentionally want silence.
-   Wait for their reply, then rerun `--check`. Verify authorization is authorized
-   and the alert style is persistent/alerts before proceeding. If they prefer
-   temporary banners or silence, honor that choice and report it explicitly.
-   If the app is absent from the list, run `--test` once, let them respond to any
-   permission prompt, then reopen settings. Stop and report the actual error if it
-   remains absent; do not keep retrying.
-   Do not reset permissions, edit the macOS notification database, or infer that
-   exit code zero proves a visible banner. Never mark setup complete while these
-   user actions are pending.
-3. Ask which editor notification clicks should open: Cursor or VS Code. Explain
-   that this is a global preference for this Claude configuration, not automatic
-   detection of the current terminal. Save their choice with
-   `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --editor cursor` or
-   `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --editor vscode`. Confirm the selected
-   application is installed. The preference persists outside the plugin cache.
-   Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --test`. Ask the user to confirm
-   the banner, sound, and whether the black bell-and-terminal icon appears and clicking it opened this project in the selected editor.
-   If any part fails, investigate that result before migrating. Respect an
-   intentionally muted sound setting; do not call audible delivery verified.
-4. Once the test succeeds and this plugin is enabled, run
-   `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --migrate`. This backs up user settings
-   and removes only this notifier's marked standalone hooks, preserving unrelated
-   commands even inside shared hook entries. It honors `CLAUDE_CONFIG_DIR`.
-   Do not delete old application files or run the legacy installer. Inspect any
-   project-level hook overrides if duplicates remain; do not remove unmarked hooks.
-5. After the custom helper passes permission, sound, and project-click tests,
-   explain that Homebrew terminal-notifier can be removed with
-   `brew uninstall terminal-notifier`. Ask before uninstalling: other software may
-   still use it. Keep the custom app. Uninstalling the original does not guarantee
-   its old macOS notification-list entry disappears immediately.
-   Tell the user to restart Claude Code. Verify `/hooks` includes this plugin's
-   PermissionRequest, AskUserQuestion PreToolUse, MCP Notification, and Stop hooks.
-   Ask them to trigger a real question and a completed response. Distinguish the
-   setup notification test from verified live Claude events.
+1. Check macOS 13+, Node.js 18+, and Apple Command Line Tools (`xcrun --find swiftc`).
+   If tools are missing, guide the user through `xcode-select --install` and wait
+   for installation. Windows is unsupported. Homebrew and terminal-notifier are
+   no longer required.
+2. Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --icon` to build or refresh
+   `~/Library/Application Support/ClaudeCursorNotifierIcon/Claude Code Notifier.app`.
+   This replaces this plugin's old branded terminal-notifier helper with its custom
+   popup, retaining the black icon. It leaves Homebrew's app alone. Source and icon
+   changes trigger rebuilding; unchanged builds are reused. Then run
+   `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --check`.
+   Report build/check failures; do not infer visible delivery from exit code zero.
+3. Ask which editor notification clicks should open: Cursor or VS Code, unless the
+   user has already chosen. Save using
+   `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --editor cursor` or `--editor vscode`.
+   Confirm the selected app is installed. This global Claude preference survives
+   plugin updates and preserves sound/duration preferences.
+4. Run `node "${CLAUDE_PLUGIN_ROOT}/src/preferences.js" --show` and explain the current
+   preferences (defaults: 5 seconds, Glass). The custom popup needs no macOS
+   notification permission or Persistent alert style. It has no Notification Center
+   history and does not follow Focus settings. A newer popup replaces the previous
+   popup. Offer `/claude-cursor-notifier:duration` and `/claude-cursor-notifier:sound`
+   to change duration or list/preview sounds.
+5. Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --test` once. Ask the user to confirm
+   the popup, black icon, expected duration/sound, and that clicking opens this project
+   in their selected editor. Respect intentional silence. Investigate failures before
+   marking setup verified.
+6. Once the test succeeds and the plugin is enabled, run
+   `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --migrate`. This backs up settings and
+   removes only this notifier's marked standalone hooks, respecting `CLAUDE_CONFIG_DIR`.
+   Preserve unrelated hooks; do not run the legacy installer or uninstall Homebrew
+   packages. Restart Claude Code after plugin installation/update and verify `/hooks`
+   includes PermissionRequest, AskUserQuestion PreToolUse, MCP Notification, and Stop.
+   Ask the user to trigger a real question and completed response. Distinguish a setup
+   popup from verified live hook events.
 
-Initialization is repeatable. Updates do not need reinstalling the external helper
-or repeating migration unless checks show a problem. Always finish with the user's
-next action. Do not claim setup is complete while permission or click confirmation
-is pending.
+Re-run init after plugin updates to refresh the compiled helper. Preference-only changes
+need no restart. Finish with the user's next action and identify any unverified UI behavior.

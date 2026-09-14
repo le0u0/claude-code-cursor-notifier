@@ -7,6 +7,8 @@ struct NotificationInput {
     let identifier: String
     let projectPath: String
     let sound: String?
+    let duration: Double
+    let editor: String
 }
 
 func parseArguments(_ arguments: [String]) -> NotificationInput? {
@@ -32,12 +34,19 @@ func parseArguments(_ arguments: [String]) -> NotificationInput? {
         return nil
     }
 
+    guard let duration = Double(values["duration"] ?? "5"),
+          duration.isFinite, duration >= 1, duration.rounded() == duration else { return nil }
+    let editor = values["editor"] ?? "Cursor"
+    guard ["Cursor", "Visual Studio Code"].contains(editor) else { return nil }
+
     return NotificationInput(
         title: title,
         subtitle: values["subtitle"] ?? "",
         body: body,
         identifier: identifier,
         projectPath: projectPath,
-        sound: values["sound"]
+        sound: values["sound"],
+        duration: duration,
+        editor: editor
     )
 }
