@@ -7,7 +7,7 @@ A Claude Code plugin for macOS notifications while working in Cursor or VS Code'
 - Plays a sound; clicking opens the originating project in your selected editor.
 - Includes `/claude-cursor-notifier:init` for setup and migration.
 - Custom popup duration: 5 seconds by default; choose any positive whole number.
-- List and preview installed macOS sounds before choosing one.
+- List and preview installed macOS sounds, including your own `~/Library/Sounds`.
 
 Requires macOS 13+, Node.js 18+, Cursor or VS Code, and Apple Command Line Tools
 (`xcode-select --install`) to build the popup. Windows is unsupported.
@@ -63,7 +63,9 @@ marketplace users can receive a new version.
 
 - `/claude-cursor-notifier:duration`: choose seconds (positive whole number; default **5**).
 - `/claude-cursor-notifier:sound`: list installed sounds, preview choices, then save one
-  (default **Glass**; **Silent** mutes).
+  (default **Glass**; **Silent** mutes). The list covers `~/Library/Sounds`,
+  `/Library/Sounds`, and `/System/Library/Sounds`, in the order macOS resolves them,
+  so a personal sound of the same name wins.
 
 These preferences use the same `claude-cursor-notifier.json` as the editor choice,
 respect `CLAUDE_CONFIG_DIR`, and survive plugin updates. The next popup uses the new

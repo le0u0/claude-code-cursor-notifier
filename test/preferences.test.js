@@ -38,3 +38,22 @@ test("duration and sound persist, preserve editor and reject invalid choices", (
     fs.rmSync(directory, { recursive: true });
   }
 });
+
+test("lists sounds installed in the user's own sounds folder", () => {
+  const home = fs.mkdtempSync(path.join(os.tmpdir(), "notifier-home-"));
+  try {
+    fs.mkdirSync(path.join(home, "Library/Sounds"), { recursive: true });
+    fs.writeFileSync(path.join(home, "Library/Sounds/CustomBell.wav"), "");
+    fs.writeFileSync(path.join(home, "Library/Sounds/notes.txt"), "");
+    const run = (...args) => spawnSync(process.execPath, [path.join(__dirname, "../src/preferences.js"), ...args], {
+      encoding: "utf8", env: { ...process.env, HOME: home, CLAUDE_CONFIG_DIR: home }
+    });
+    const sounds = JSON.parse(run("--list-sounds").stdout);
+    assert.ok(sounds.includes("CustomBell"));
+    assert.ok(!sounds.includes("notes"));
+    assert.equal(run("--sound", "CustomBell").status, 0);
+    assert.equal(JSON.parse(run("--show").stdout).sound, "CustomBell");
+  } finally {
+    fs.rmSync(home, { recursive: true });
+  }
+});

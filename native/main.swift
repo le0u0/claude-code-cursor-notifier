@@ -6,6 +6,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     var panel: NSPanel?
     var sound: NSSound?
     let replacement = Notification.Name("com.le0u0.claude-code-cursor-notifier.replace-popup")
+    let identity = String(ProcessInfo.processInfo.processIdentifier)
 
     init(input: NotificationInput) {
         self.input = input
@@ -13,8 +14,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_: Notification) {
         // Only the latest popup stays visible, so simultaneous hooks cannot overlap.
-        DistributedNotificationCenter.default().postNotificationName(replacement, object: nil, userInfo: nil, deliverImmediately: true)
-        DistributedNotificationCenter.default().addObserver(self, selector: #selector(dismiss), name: replacement, object: nil)
+        DistributedNotificationCenter.default().postNotificationName(replacement, object: identity, userInfo: nil, deliverImmediately: true)
+        DistributedNotificationCenter.default().addObserver(self, selector: #selector(replace(_:)), name: replacement, object: nil)
         guard let screen = NSScreen.main else { NSApplication.shared.terminate(nil); return }
         let frame = screen.visibleFrame
         let panel = NSPanel(
@@ -78,6 +79,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         print("Popup displayed")
         fflush(stdout)
         Timer.scheduledTimer(withTimeInterval: input.duration, repeats: false) { [weak self] _ in self?.dismiss() }
+    }
+
+    // A popup must survive its own replacement post, which can arrive after this observer registers.
+    @objc func replace(_ note: Notification) {
+        guard note.object as? String != identity else { return }
+        dismiss()
     }
 
     @objc func openOrigin() {

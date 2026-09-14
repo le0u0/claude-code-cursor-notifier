@@ -8,7 +8,8 @@ description: List, preview, and choose the macOS notification sound for Claude C
    - `node "${CLAUDE_PLUGIN_ROOT}/src/preferences.js" --list-sounds`
    Show the current sound and the complete returned list as numbered choices.
    Empty sound means Silent; Glass is the default. List actual installed sounds,
-   not a hardcoded list. Tell the user they can preview names or numbers before saving.
+   not a hardcoded list; the list covers the user's own `~/Library/Sounds` as well as
+   `/Library/Sounds` and `/System/Library/Sounds`. Tell the user they can preview names or numbers before saving.
 2. If the user has not chosen, ask which sounds they want to hear. Map numbers back
    to the displayed names. Preview requested sounds one at a time with
    `node "${CLAUDE_PLUGIN_ROOT}/src/preferences.js" --preview "NAME"`, identifying

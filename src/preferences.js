@@ -27,10 +27,20 @@ function durationSeconds(value) {
   return seconds;
 }
 
+const soundExtensions = new Set([".aiff", ".aif", ".wav", ".caf", ".m4a", ".mp3", ".aac"]);
+
 function soundFiles() {
-  const directory = "/System/Library/Sounds";
-  return Object.fromEntries(fs.readdirSync(directory).filter((file) => file.endsWith(".aiff"))
-    .map((file) => [path.basename(file, ".aiff"), path.join(directory, file)]));
+  // NSSound resolves these directories in order, so an earlier one shadows a later one.
+  const directories = [path.join(os.homedir(), "Library/Sounds"), "/Library/Sounds", "/System/Library/Sounds"];
+  const files = {};
+  for (const directory of directories.filter((candidate) => fs.existsSync(candidate))) {
+    for (const file of fs.readdirSync(directory)) {
+      const name = path.basename(file, path.extname(file));
+      if (!soundExtensions.has(path.extname(file).toLowerCase()) || Object.hasOwn(files, name)) continue;
+      files[name] = path.join(directory, file);
+    }
+  }
+  return files;
 }
 
 function soundName(value) {
