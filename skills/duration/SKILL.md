@@ -9,7 +9,7 @@ Configure this plugin's custom popup, not macOS Notification Center banners.
    duration. The default is 5 seconds.
 2. If the user supplied a positive whole number of seconds, use it. Otherwise ask with
    the AskUserQuestion tool so they pick with the arrow keys: `5 seconds (default)`,
-   `10 seconds`, `15 seconds`. Its free-text choice accepts any other positive whole
+   `8 seconds`, `10 seconds`. Its free-text choice accepts any other positive whole
    number. A request to reset means 5. Do not silently choose for them.
 3. Save with `node "${CLAUDE_PLUGIN_ROOT}/src/preferences.js" --duration SECONDS`.
    Run `--show` again to verify the saved value. This preserves the editor and sound
