@@ -21,12 +21,19 @@ Keep the working directory at the user's project so the test opens that folder.
    `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --editor cursor` or `--editor vscode`.
    Confirm the selected app is installed. This global Claude preference survives
    plugin updates and preserves sound/duration preferences.
-4. Run `node "${CLAUDE_PLUGIN_ROOT}/src/preferences.js" --show` and explain the current
-   preferences (defaults: 5 seconds, Glass). The custom popup needs no macOS
-   notification permission or Persistent alert style. It has no Notification Center
-   history and does not follow Focus settings. A newer popup replaces the previous
-   popup. Offer `/claude-cursor-notifier:duration` and `/claude-cursor-notifier:sound`
-   to change duration or list/preview sounds.
+4. Run `node "${CLAUDE_PLUGIN_ROOT}/src/preferences.js" --saved`. It prints only what the
+   user has actually chosen, so a missing key is unset rather than deliberate. Settle every
+   unset key now; do not let a default stand in silently.
+   - `duration` missing: use this plugin's duration skill to ask how many seconds popups
+     stay visible, then save it. Say that 5 is the fallback but still ask.
+   - `sound` missing: use this plugin's sound skill so the user picks with the arrow keys
+     and hears a preview, then save it. Say that Glass is the fallback but still ask.
+   Re-run `--saved` and confirm `editor`, `duration`, and `sound` are all present.
+   Report the values. The custom popup needs no macOS notification permission and no
+   Persistent alert style. It has no Notification Center history and ignores Focus
+   settings. A newer popup replaces the previous popup. Later changes go through
+   `/claude-cursor-notifier:duration` and `/claude-cursor-notifier:sound`.
+
 5. Run `node "${CLAUDE_PLUGIN_ROOT}/src/init.js" --test` once. Ask the user to confirm
    the popup, black icon, expected duration/sound, and that clicking opens this project
    in their selected editor. Respect intentional silence. Investigate failures before

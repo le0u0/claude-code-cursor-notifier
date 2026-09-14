@@ -10,13 +10,18 @@ function configPath() {
   return path.join(process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), ".claude"), "claude-cursor-notifier.json");
 }
 
-function preferences() {
+function savedPreferences() {
   const file = configPath();
-  return { editor: "cursor", duration: 5, sound: "Glass", ...(fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {}) };
+  return fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, "utf8")) : {};
+}
+
+function preferences() {
+  return { editor: "cursor", duration: 5, sound: "Glass", ...savedPreferences() };
 }
 
 function savePreference(key, value) {
-  const next = { ...preferences(), [key]: value };
+  // Store only what the user chose, so init can tell an unset preference from a default.
+  const next = { ...savedPreferences(), [key]: value };
   const file = configPath();
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, `${JSON.stringify(next, null, 2)}\n`, { mode: 0o600 });
@@ -107,6 +112,8 @@ if (require.main === module) {
     const [mode, value] = process.argv.slice(2);
     if (mode === "--show") {
       process.stdout.write(`${JSON.stringify(preferences())}\n`);
+    } else if (mode === "--saved") {
+      process.stdout.write(`${JSON.stringify(savedPreferences())}\n`);
     } else if (mode === "--duration") {
       savePreference("duration", durationSeconds(value));
       process.stdout.write(`Popup duration: ${value} seconds.\n`);
@@ -131,7 +138,7 @@ if (require.main === module) {
         if (result.error || result.status !== 0) throw new Error(result.error?.message || "Sound preview failed.");
       }
     } else {
-      throw new Error("Usage: preferences.js --show|--duration SECONDS|--list-sounds|--choose|--sound NAME|--preview NAME");
+      throw new Error("Usage: preferences.js --show|--saved|--duration SECONDS|--list-sounds|--choose|--sound NAME|--preview NAME");
     }
   } catch (error) {
     process.stderr.write(`${error.message}\n`);
@@ -139,4 +146,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { preferences, savePreference, durationSeconds, soundName, soundFiles };
+module.exports = { preferences, savedPreferences, savePreference, durationSeconds, soundName, soundFiles };

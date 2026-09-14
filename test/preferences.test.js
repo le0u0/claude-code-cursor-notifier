@@ -65,3 +65,18 @@ test("the sound picker refuses to run without a terminal", () => {
   assert.equal(result.status, 1);
   assert.match(result.stderr, /needs a terminal/);
 });
+
+test("--saved reports only the preferences the user chose", () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), "notifier-saved-"));
+  try {
+    const run = (...args) => spawnSync(process.execPath, [path.join(__dirname, "../src/preferences.js"), ...args], {
+      encoding: "utf8", env: { ...process.env, CLAUDE_CONFIG_DIR: directory }
+    });
+    assert.deepEqual(JSON.parse(run("--saved").stdout), {});
+    assert.equal(run("--duration", "9").status, 0);
+    assert.deepEqual(JSON.parse(run("--saved").stdout), { duration: 9 });
+    assert.deepEqual(JSON.parse(run("--show").stdout), { editor: "cursor", duration: 9, sound: "Glass" });
+  } finally {
+    fs.rmSync(directory, { recursive: true });
+  }
+});
