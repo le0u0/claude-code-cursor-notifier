@@ -6,8 +6,11 @@ A Claude Code plugin for macOS notifications while working in Cursor or VS Code'
 - Shows Claude Code and the selected editor, the project name, and the action needed.
 - Plays a sound; clicking opens the originating project in your selected editor.
 - Includes `/claude-cursor-notifier:init` for setup and migration.
+- Custom popup duration: 5 seconds by default; choose any positive whole number.
+- List and preview installed macOS sounds before choosing one.
 
-Requires macOS, Node.js 18+, Cursor or VS Code, and terminal-notifier 3+ for first setup only.
+Requires macOS 13+, Node.js 18+, Cursor or VS Code, and Apple Command Line Tools
+(`xcode-select --install`) to build the popup. Windows is unsupported.
 
 ## Install
 
@@ -24,11 +27,10 @@ Restart Claude Code, then run:
 /claude-cursor-notifier:init
 ```
 
-The init skill lets you choose Cursor or VS Code, checks dependencies and notification permission, sends a banner,
-sound, and click test, then backs up settings and removes this notifier's old
-standalone hooks. The skill opens System Settings when permission or alert style needs attention,
-guides you to allow notifications and choose Persistent/Alerts, then rechecks.
-macOS permission must be granted by you. It preserves unrelated hooks.
+The init skill builds the custom popup, lets you choose Cursor or VS Code, sends a
+sound and click test, then backs up settings and removes this notifier's old
+standalone hooks. No macOS notification permission or Persistent alert style is needed.
+Custom popups do not appear in Notification Center and do not follow Focus settings.
 Do not use the legacy `install.sh` for plugin installation.
 
 ## Test this checkout before publishing
@@ -52,9 +54,21 @@ For a GitHub marketplace installation:
 /plugin update claude-cursor-notifier@claude-cursor-notifier-marketplace
 ```
 
-Restart Claude Code. Plugin updates replace the hooks and skill; they do not upgrade
-terminal-notifier or change macOS permissions. Maintainers must publish their changes
-and bump `.claude-plugin/plugin.json` before users can receive a new plugin version.
+Restart Claude Code, then run `/claude-cursor-notifier:init` to refresh the compiled
+popup. The installer checks source and icon contents and skips unchanged builds.
+Maintainers must publish changes and bump `.claude-plugin/plugin.json` before
+marketplace users can receive a new version.
+
+## Duration and sound
+
+- `/claude-cursor-notifier:duration`: choose seconds (positive whole number; default **5**).
+- `/claude-cursor-notifier:sound`: list installed sounds, preview choices, then save one
+  (default **Glass**; **Silent** mutes).
+
+These preferences use the same `claude-cursor-notifier.json` as the editor choice,
+respect `CLAUDE_CONFIG_DIR`, and survive plugin updates. The next popup uses the new
+values without restarting. Clicking, closing, or a newer notification dismisses a
+popup early; only the latest popup remains visible.
 
 ## Troubleshooting
 
@@ -62,7 +76,8 @@ Run `/claude-cursor-notifier:init` again. Hook delivery errors appear on stderr 
 a setup hint; delivery failure never blocks approval or keeps a Stop hook running.
 The default sound is `Glass`. Set `CLAUDE_CURSOR_NOTIFIER_SOUND` to another system
 sound, or an empty string to mute. `CLAUDE_CURSOR_NOTIFIER_PATH` can point to a custom
-terminal-notifier executable. No runtime files are written inside the plugin cache.
+popup helper executable accepting the native `--title`, `--body`, and related arguments.
+Old terminal-notifier overrides must be removed when migrating. No runtime files are written inside the plugin cache.
 
 ## Uninstall
 
@@ -71,8 +86,8 @@ terminal-notifier executable. No runtime files are written inside the plugin cac
 ```
 
 Restart Claude Code. This leaves terminal-notifier installed for other applications.
-The legacy standalone installer and native sources remain for compatibility; the
-plugin uses terminal-notifier and does not build the native helper.
+The custom helper and saved preferences remain on disk. The legacy standalone
+installer remains for compatibility; use the init skill for plugin setup.
 
 ## License
 
@@ -90,20 +105,10 @@ and survives plugin updates.
 
 The init skill installs the original black bell-and-terminal icon in a dedicated
 `Claude Code Notifier.app` under `~/Library/Application Support/ClaudeCursorNotifierIcon`.
-It copies the installed terminal-notifier app, preserves its license, and leaves
-Homebrew's copy unchanged. Enable notifications for **Claude Code Notifier** when
-asked. Select **Persistent** (or **Alerts**) in macOS notification settings to keep
-notifications visible until dismissed. Re-run init after icon updates.
-
-## Remove the temporary Homebrew dependency
-
-After init verifies the custom helper, you may run `brew uninstall terminal-notifier`
-if no other software uses it. Daily alerts, permission checks, and future icon
-updates reuse the standalone custom app. Unchanged icons do not rebuild or re-sign it.
-Keep `~/Library/Application Support/ClaudeCursorNotifierIcon/Claude Code Notifier.app`.
-If that app is deleted, install terminal-notifier again for setup. Plugin updates
-do not upgrade the copied notification engine; upgrading that engine still requires
-a new source helper. macOS may retain the original app's notification-list entry.
+It builds the bundled Swift sources and installs a signed local app. Existing branded
+terminal-notifier helpers are replaced only after the new build passes verification;
+Homebrew's copy is left unchanged. Re-run init after updates. Homebrew terminal-notifier
+is no longer a dependency, but other software may still use it.
 
 ## Alert text
 
