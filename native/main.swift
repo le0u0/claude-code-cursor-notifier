@@ -18,8 +18,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DistributedNotificationCenter.default().addObserver(self, selector: #selector(replace(_:)), name: replacement, object: nil)
         guard let screen = NSScreen.main else { NSApplication.shared.terminate(nil); return }
         let frame = screen.visibleFrame
+        // Every body string is one short line, so the popup stays close to a system banner.
+        let size = NSSize(width: 320, height: 76)
         let panel = NSPanel(
-            contentRect: NSRect(x: frame.maxX - 380, y: frame.maxY - 144, width: 360, height: 124),
+            contentRect: NSRect(x: frame.maxX - size.width - 20, y: frame.maxY - size.height - 20, width: size.width, height: size.height),
             styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false
         )
         panel.level = .floating
@@ -30,27 +32,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         panel.hidesOnDeactivate = false
         panel.isReleasedWhenClosed = false
 
-        let background = NSVisualEffectView(frame: NSRect(x: 0, y: 0, width: 360, height: 124))
+        let background = NSVisualEffectView(frame: NSRect(origin: .zero, size: size))
         background.material = .hudWindow
         background.state = .active
         background.wantsLayer = true
-        background.layer?.cornerRadius = 16
+        background.layer?.cornerRadius = 14
         background.layer?.masksToBounds = true
         panel.contentView = background
 
-        let icon = NSImageView(frame: NSRect(x: 14, y: 63, width: 40, height: 40))
+        let icon = NSImageView(frame: NSRect(x: 12, y: 20, width: 36, height: 36))
         icon.image = NSImage(named: NSImage.Name("NSApplicationIcon"))
         background.addSubview(icon)
         let lines: [(String, CGFloat, CGFloat, NSFont)] = [
-            (input.title, 88, 20, .boldSystemFont(ofSize: 13)),
-            (input.subtitle, 67, 18, .systemFont(ofSize: 12)),
-            (input.body, 17, 43, .systemFont(ofSize: 13))
+            (input.title, 46, 17, .boldSystemFont(ofSize: 13)),
+            (input.subtitle, 31, 14, .systemFont(ofSize: 11)),
+            (input.body, 13, 17, .systemFont(ofSize: 12))
         ]
         for (text, y, height, font) in lines {
-            let label = NSTextField(wrappingLabelWithString: text)
-            label.frame = NSRect(x: 65, y: y, width: 260, height: height)
+            let label = NSTextField(labelWithString: text)
+            label.frame = NSRect(x: 58, y: y, width: size.width - 82, height: height)
             label.font = font
-            label.maximumNumberOfLines = height > 20 ? 2 : 1
+            label.maximumNumberOfLines = 1
             label.lineBreakMode = .byTruncatingTail
             background.addSubview(label)
         }
@@ -64,9 +66,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         background.addSubview(open)
 
         let close = NSButton(title: "×", target: self, action: #selector(dismiss))
-        close.frame = NSRect(x: 330, y: 94, width: 24, height: 24)
+        close.frame = NSRect(x: size.width - 24, y: size.height - 24, width: 20, height: 20)
         close.isBordered = false
-        close.font = .systemFont(ofSize: 18)
+        close.font = .systemFont(ofSize: 15)
         close.setAccessibilityLabel("Dismiss notification")
         background.addSubview(close)
 

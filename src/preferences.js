@@ -3,7 +3,8 @@
 const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
-const { spawnSync } = require("node:child_process");
+const readline = require("node:readline");
+const { spawn, spawnSync } = require("node:child_process");
 
 function configPath() {
   return path.join(process.env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), ".claude"), "claude-cursor-notifier.json");
@@ -49,6 +50,58 @@ function soundName(value) {
   return value;
 }
 
+async function chooseSound() {
+  if (!process.stdin.isTTY) throw new Error("--choose needs a terminal. Run it yourself, or use --list-sounds and --sound NAME.");
+  const files = soundFiles();
+  const names = ["Silent", ...Object.keys(files).sort()];
+  const saved = preferences().sound || "Silent";
+  let index = Math.max(0, names.indexOf(saved));
+  let player;
+
+  const render = (first) => {
+    if (!first) process.stdout.write(`\u001b[${names.length + 1}A`);
+    process.stdout.write("Up/Down previews a sound, Enter saves it, Esc cancels.\u001b[K\n");
+    for (const [position, name] of names.entries()) {
+      const marker = position === index ? "\u001b[36m\u276f\u001b[0m" : " ";
+      process.stdout.write(`${marker} ${name}${name === saved ? " (saved)" : ""}\u001b[K\n`);
+    }
+  };
+
+  const preview = () => {
+    player?.kill();
+    const file = files[names[index]];
+    player = file ? spawn("/usr/bin/afplay", [file], { stdio: "ignore" }) : undefined;
+  };
+
+  readline.emitKeypressEvents(process.stdin);
+  process.stdin.setRawMode(true);
+  process.stdout.write("\u001b[?25l");
+  render(true);
+  try {
+    return await new Promise((resolve) => {
+      process.stdin.on("keypress", (_, key) => {
+        if (key.name === "up" || key.name === "down") {
+          index = (index + (key.name === "down" ? 1 : names.length - 1)) % names.length;
+          render(false);
+          preview();
+        } else if (key.name === "return") {
+          resolve(names[index]);
+        } else if (key.name === "escape" || (key.ctrl && key.name === "c")) {
+          resolve(undefined);
+        }
+      });
+    });
+  } finally {
+    player?.kill();
+    process.stdout.write("\u001b[?25h");
+    process.stdin.setRawMode(false);
+    // Keypress events keep the terminal handle referenced, so drop them before returning.
+    process.stdin.removeAllListeners("keypress");
+    process.stdin.pause();
+    process.stdin.unref();
+  }
+}
+
 if (require.main === module) {
   try {
     const [mode, value] = process.argv.slice(2);
@@ -62,6 +115,15 @@ if (require.main === module) {
     } else if (mode === "--sound") {
       savePreference("sound", soundName(value));
       process.stdout.write(`Notification sound: ${value || "Silent"}.\n`);
+    } else if (mode === "--choose") {
+      chooseSound().then((name) => {
+        if (!name) return process.stdout.write("Cancelled. Sound unchanged.\n");
+        savePreference("sound", soundName(name));
+        process.stdout.write(`Notification sound: ${name}.\n`);
+      }).catch((error) => {
+        process.stderr.write(`${error.message}\n`);
+        process.exitCode = 1;
+      });
     } else if (mode === "--preview") {
       const sound = soundName(value);
       if (sound) {
@@ -69,7 +131,7 @@ if (require.main === module) {
         if (result.error || result.status !== 0) throw new Error(result.error?.message || "Sound preview failed.");
       }
     } else {
-      throw new Error("Usage: preferences.js --show|--duration SECONDS|--list-sounds|--sound NAME|--preview NAME");
+      throw new Error("Usage: preferences.js --show|--duration SECONDS|--list-sounds|--choose|--sound NAME|--preview NAME");
     }
   } catch (error) {
     process.stderr.write(`${error.message}\n`);
@@ -77,4 +139,4 @@ if (require.main === module) {
   }
 }
 
-module.exports = { preferences, savePreference, durationSeconds, soundName };
+module.exports = { preferences, savePreference, durationSeconds, soundName, soundFiles };

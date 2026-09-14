@@ -57,3 +57,11 @@ test("lists sounds installed in the user's own sounds folder", () => {
     fs.rmSync(home, { recursive: true });
   }
 });
+
+test("the sound picker refuses to run without a terminal", () => {
+  const result = spawnSync(process.execPath, [path.join(__dirname, "../src/preferences.js"), "--choose"], {
+    encoding: "utf8", stdio: ["pipe", "pipe", "pipe"]
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stderr, /needs a terminal/);
+});
