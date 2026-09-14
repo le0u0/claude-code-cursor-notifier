@@ -17,7 +17,7 @@ async function waitForFile(filePath) {
   assert.fail("Timed out waiting for notifier");
 }
 
-test("launches terminal-notifier for a supported hook event", async () => {
+test("launches the popup helper for a supported hook event", async () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "claude-hook-test-"));
   const notifier = path.join(directory, "terminal-notifier");
   const log = path.join(directory, "notifier.log");
@@ -47,17 +47,21 @@ test("launches terminal-notifier for a supported hook event", async () => {
   assert.equal(result.status, 0);
   await waitForFile(log);
   assert.deepEqual(fs.readFileSync(log, "utf8").trim().split("\n"), [
-    "-title",
+    "--title",
     "Claude Code · Cursor",
-    "-subtitle",
+    "--subtitle",
     "payments",
-    "-message",
+    "--body",
     "Response finished",
-    "-group",
+    "--identifier",
     "claude-session-123",
-    "-execute",
-    "/usr/bin/open -a 'Cursor' '/tmp/payments'",
-    "-sound",
+    "--project-path",
+    "/tmp/payments",
+    "--editor",
+    "Cursor",
+    "--duration",
+    "5",
+    "--sound",
     "Glass"
   ]);
 

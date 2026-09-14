@@ -37,6 +37,11 @@ test(
         '        guard input.projectPath == "/tmp/payments" else { exit(6) }',
         '        guard input.sound == "Blow" else { exit(7) }',
         '        guard parseArguments(["helper"]) == nil else { exit(8) }',
+        '        guard input.duration == 5 && input.editor == "Cursor" else { exit(9) }',
+        '        guard parseArguments(arguments + ["--duration", "10", "--editor", "Visual Studio Code"])?.duration == 10 else { exit(10) }',
+        '        guard parseArguments(arguments + ["--duration", "0"]) == nil else { exit(11) }',
+        '        guard parseArguments(arguments + ["--duration", "nan"]) == nil else { exit(12) }',
+        '        guard parseArguments(arguments + ["--editor", "bad"]) == nil else { exit(13) }',
         "    }",
         "}"
       ].join("\n")

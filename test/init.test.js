@@ -62,7 +62,7 @@ test("editor choice persists and controls notification click command", () => {
     for (const [choice, app] of [["vscode", "Visual Studio Code"], ["cursor", "Cursor"]]) {
       assert.equal(run("--editor", choice).status, 0);
       assert.equal(run("--test").status, 0);
-      assert.ok(fs.readFileSync(log, "utf8").includes(`/usr/bin/open -a '${app}' '${fs.realpathSync(directory)}'`));
+      assert.ok(fs.readFileSync(log, "utf8").includes(`--editor\n${app}\n`));
     }
     const before = fs.readFileSync(path.join(directory, "claude-cursor-notifier.json"), "utf8");
     assert.equal(run("--editor", "unknown").status, 1);

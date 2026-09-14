@@ -25,11 +25,11 @@ if (mode === "--icon") {
     process.stderr.write("This plugin requires macOS.\n");
     process.exitCode = 1;
   } else {
-    const result = spawnSync(notifierPath(), ["-diagnose"], { encoding: "utf8", timeout: 15000 });
+    const result = spawnSync(notifierPath(), ["--self-test"], { encoding: "utf8", timeout: 15000 });
     process.stdout.write(result.stdout || "");
     process.stderr.write(result.stderr || "");
     if (result.error) {
-      process.stderr.write(`${result.error.message}\nInstall terminal-notifier 3+ with: brew install terminal-notifier\n`);
+      process.stderr.write(`${result.error.message}\nBuild the popup helper with: node "${__filename}" --icon\n`);
     }
     process.exitCode = result.error ? 1 : result.status || 0;
   }
